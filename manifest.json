@@ -1,0 +1,16 @@
+{
+  "name": "2027 曼谷FBG旅遊",
+  "short_name": "曼谷旅遊",
+  "description": "2027.01.23–01.27 曼谷FBG旅遊行程手冊",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#F6EFE2",
+  "theme_color": "#4A382C",
+  "lang": "zh-Hant",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
