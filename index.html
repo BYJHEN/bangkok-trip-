@@ -348,6 +348,13 @@ input,textarea,select{font-family:var(--font-body)}
 .ev .ev-ic{font-size:.9rem;margin-right:4px}
 .ev .ev-tt{font-size:.9rem;font-weight:600;color:var(--text);margin-bottom:3px;line-height:1.3}
 .ev .ev-dd{font-size:.8rem;color:var(--text2);line-height:1.5}
+.ev-links{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
+.ev-link-btn{
+  display:inline-flex;align-items:center;gap:4px;padding:4px 10px;
+  background:var(--primary);color:#fff;border-radius:6px;
+  font-size:.72rem;font-weight:600;text-decoration:none;
+}
+.ev-link-attach{background:var(--secondary);}
 .ev .ev-dd a{color:var(--primary);text-decoration:underline;text-underline-offset:2px}
 .ev-rm{
   position:absolute;right:0;top:0;border:none;background:none;
@@ -397,16 +404,22 @@ input,textarea,select{font-family:var(--font-body)}
   transition:all .15s;
 }
 .subtab-btn.active{background:var(--primary);border-color:var(--primary);color:#fff}
-.list-tools{display:flex;gap:8px;margin-bottom:14px}
-.list-tools input[type=text]{
+.list-tools{display:flex;gap:8px;margin-bottom:14px;align-items:flex-end;}
+.list-tools-inputs{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0;}
+.list-tools input[type=text],.list-tools input[type=url]{
   flex:1;border:1.5px solid var(--div);background:var(--card);
   border-radius:var(--r-xs);padding:11px 14px;font-size:.88rem;color:var(--text);outline:none;
-  transition:border-color .2s;
+  transition:border-color .2s;width:100%;
 }
-.list-tools input[type=text]:focus{border-color:var(--primary)}
+.list-tools input[type=url]{font-size:.78rem;padding:8px 14px;color:var(--text2);}
+.list-tools input[type=text]:focus,.list-tools input[type=url]:focus{border-color:var(--primary)}
 .list-tools button{
-  border:none;background:var(--primary);color:#fff;
-  border-radius:var(--r-xs);padding:0 18px;font-weight:600;font-size:.85rem;
+  border:none;background:var(--primary);color:#fff;flex-shrink:0;
+  border-radius:var(--r-xs);padding:0 18px;font-weight:600;font-size:.85rem;align-self:stretch;
+}
+.check-row .item-link{
+  color:var(--primary);text-decoration:none;font-size:.9rem;flex-shrink:0;
+  display:inline-flex;align-items:center;padding:2px;
 }
 .list-progress{font-size:.73rem;color:var(--text3);margin-bottom:12px;letter-spacing:.03em}
 .progress-bar-wrap{background:var(--bg2);border-radius:999px;height:4px;margin-bottom:12px;overflow:hidden}
@@ -773,6 +786,10 @@ input,textarea,select{font-family:var(--font-body)}
       <label>Google Maps 連結</label>
       <input type="url" id="edit-ev-gmap" placeholder="https://maps.app.goo.gl/…">
     </div>
+    <div class="edit-field">
+      <label>附件連結</label>
+      <input type="url" id="edit-ev-attach" placeholder="訂單/票券/QRcode 等連結（選填）">
+    </div>
     <div class="edit-actions">
       <button class="edit-cancel-btn" onclick="closeEditModal()">取消</button>
       <button class="edit-save-btn" onclick="saveEditEvent()">儲存</button>
@@ -974,7 +991,10 @@ input,textarea,select{font-family:var(--font-body)}
   <section id="view-packing" class="view">
     <div class="page-head"><h2>行李清單</h2><div class="sub">勾選完成 · 可自訂新增</div></div>
     <div class="list-tools">
-      <input type="text" id="packInput" placeholder="新增物品，例如：轉接頭">
+      <div class="list-tools-inputs">
+        <input type="text" id="packInput" placeholder="新增物品，例如：轉接頭">
+        <input type="url" id="packLinkInput" placeholder="連結（選填，例如商品頁）">
+      </div>
       <button onclick="addItem('pack')">新增</button>
     </div>
     <div class="progress-bar-wrap"><div class="progress-bar-fill" id="packBar" style="width:0%"></div></div>
@@ -991,7 +1011,10 @@ input,textarea,select{font-family:var(--font-body)}
       <button class="subtab-btn" data-sub="do" onclick="goWishSub('do')">🎯 必做</button>
     </div>
     <div class="list-tools">
-      <input type="text" id="wishInput" placeholder="新增品項">
+      <div class="list-tools-inputs">
+        <input type="text" id="wishInput" placeholder="新增品項">
+        <input type="url" id="wishLinkInput" placeholder="連結（選填，例如商品頁）">
+      </div>
       <button onclick="addItem(currentWishSub)">新增</button>
     </div>
     <div class="progress-bar-wrap"><div class="progress-bar-fill" id="wishBar" style="width:0%"></div></div>
@@ -1441,9 +1464,9 @@ function addDayEvent(date){
   const g=id=>document.getElementById(id);
   const tt=g('newEvTitle').value.trim();
   if(!tt){g('newEvTitle').focus();return;}
-  const ev={id:'ev-'+date+'-'+Date.now(),t:g('newEvTime').value.trim()||'—',ic:g('newEvIcon').value.trim()||'📌',tt,dd:g('newEvDesc').value.trim(),gmap:g('newEvGmap').value.trim()};
+  const ev={id:'ev-'+date+'-'+Date.now(),t:g('newEvTime').value.trim()||'—',ic:g('newEvIcon').value.trim()||'📌',tt,dd:g('newEvDesc').value.trim(),gmap:g('newEvGmap').value.trim(),attachUrl:g('newEvAttach').value.trim()};
   DAY_EVENTS[date].push(ev);saveDayEvents(date);
-  ['newEvTime','newEvIcon','newEvTitle','newEvDesc','newEvGmap'].forEach(id=>g(id).value='');
+  ['newEvTime','newEvIcon','newEvTitle','newEvDesc','newEvGmap','newEvAttach'].forEach(id=>g(id).value='');
   renderDayStage();
   refreshCustomMapMarkers();
 }
@@ -1472,14 +1495,16 @@ function renderDayStage(){
         if(now>=s&&now<=e2) nowFlag=true;
       }
     }
-    const gmapHtml=ev.gmap?`<div style="margin-top:5px"><a href="${ev.gmap}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:var(--primary);color:#fff;border-radius:6px;font-size:.72rem;font-weight:600;text-decoration:none">🗺️ Google Maps</a></div>`:'';
+    const gmapHtml=ev.gmap?`<a href="${ev.gmap}" target="_blank" rel="noopener" class="ev-link-btn">🗺️ Google Maps</a>`:'';
+    const attachHtml=ev.attachUrl?`<a href="${ev.attachUrl}" target="_blank" rel="noopener" class="ev-link-btn ev-link-attach">📎 附件</a>`:'';
+    const linksHtml=(gmapHtml||attachHtml)?`<div class="ev-links">${gmapHtml}${attachHtml}</div>`:'';
     return `<div class="ev ${nowFlag?'now':''}">
       <button class="ev-edit" onclick="openEditModal('${day.date}','${ev.id}')" title="編輯">編輯</button>
       <button class="ev-rm" onclick="removeDayEvent_wrap('${day.date}|${ev.id}')" title="移除">✕</button>
       <div class="ev-t"><span class="ev-ic">${ev.ic}</span>${ev.t}${nowFlag?'<span class="now-tag">進行中</span>':''}</div>
       <div class="ev-tt">${ev.tt}</div>
       ${ev.dd?`<div class="ev-dd">${ev.dd}</div>`:''}
-      ${gmapHtml}
+      ${linksHtml}
     </div>`;
   }).join('')||'<div class="ev-dd" style="padding-left:4px;font-size:.85rem;color:var(--text3)">這天還沒有行程，新增第一個吧！</div>';
 
@@ -1492,6 +1517,7 @@ function renderDayStage(){
     <input id="newEvTitle" placeholder="行程標題">
     <input id="newEvDesc" placeholder="備註說明（選填）">
     <input id="newEvGmap" type="url" placeholder="Google Maps 連結（選填）">
+    <input id="newEvAttach" type="url" placeholder="附件連結（選填，訂單/票券/QRcode等）">
     <div class="add-ev-hint">含座標的完整 Google Maps 連結（網址列含 @緯度,經度）才能自動顯示在「地圖」頁籤上；短網址 maps.app.goo.gl 僅會顯示按鈕，不會加地圖釘。</div>
     <button class="add-ev-btn" onclick="addDayEvent('${day.date}')">新增行程</button>
   </div>`;
@@ -1534,6 +1560,7 @@ function openEditModal(date, id){
   });
   g('edit-ev-dd').value   = tempDiv.innerHTML.replace(/<br\s*\/?>/gi,'\n').replace(/<[^>]+>/g,'').trim();
   g('edit-ev-gmap').value = ev.gmap || '';
+  g('edit-ev-attach').value = ev.attachUrl || '';
   document.getElementById('edit-modal').classList.add('open');
   setTimeout(()=>g('edit-ev-tt').focus(),120);
 }
@@ -1554,6 +1581,7 @@ function saveEditEvent(){
     tt,
     dd:   g('edit-ev-dd').value.trim().replace(/\n/g,'<br>'),
     gmap: g('edit-ev-gmap').value.trim(),
+    attachUrl: g('edit-ev-attach').value.trim(),
   };
   const events=DAY_EVENTS[date]||[];
   const idx=events.findIndex(e=>e.id===id);
@@ -1611,6 +1639,7 @@ function renderChecklist(kind){
     <div class="check-row ${item.checked?'done':''}">
       <div class="chk" onclick="toggleItem('${kind}','${item.id}')">${item.checked?'✓':''}</div>
       <span>${item.text}</span>
+      ${item.link?`<a class="item-link" href="${item.link}" target="_blank" rel="noopener" title="開啟連結">🔗</a>`:''}
       <button class="rm" onclick="removeItem_wrap('${kind}|${item.id}')">✕</button>
     </div>`).join('')||'<div class="check-row"><span style="color:var(--text3)">目前沒有項目</span></div>';
 }
@@ -1625,10 +1654,12 @@ function removeItem(kind,id){
 window.removeItem_wrap=function(arg){const[k,id]=arg.split('|');removeItem(k,id);};
 function addItem(kind){
   const iid=kind==='pack'?'packInput':'wishInput';
+  const lid=kind==='pack'?'packLinkInput':'wishLinkInput';
   const inp=document.getElementById(iid),text=inp.value.trim();
+  const linkInp=document.getElementById(lid),link=linkInp?linkInp.value.trim():'';
   if(!text)return;
-  STATE[kind].push({id:kind+'-'+Date.now(),text,checked:false});
-  saveList(KIND_CFG[kind].key,STATE[kind]);inp.value='';renderChecklist(kind);
+  STATE[kind].push({id:kind+'-'+Date.now(),text,checked:false,link});
+  saveList(KIND_CFG[kind].key,STATE[kind]);inp.value='';if(linkInp)linkInp.value='';renderChecklist(kind);
 }
 
 /* ═══════════════════════════════════════
