@@ -589,6 +589,8 @@ input,textarea,select{font-family:var(--font-body)}
 .ledger-total-label{font-size:.68rem;color:var(--text3);font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
 .ledger-total-value{font-family:var(--font-num);font-size:1.15rem;font-weight:700;color:var(--primary);margin-top:2px;}
 .ledger-per-person{display:flex;gap:8px;margin-top:12px;}
+.ledger-per-person-label{font-size:.66rem;color:var(--text3);margin-top:12px;letter-spacing:.02em;}
+.ledger-lifetime-total{font-size:.7rem;color:var(--text3);margin-top:12px;padding-top:10px;border-top:1px dashed var(--div);}
 .ledger-person{
   flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
   background:var(--bg);border:1px solid var(--div);border-radius:var(--r-xs);padding:9px 4px;font-size:.78rem;color:var(--text2);
@@ -598,12 +600,23 @@ input,textarea,select{font-family:var(--font-body)}
 .ledger-item{
   background:var(--card);border:1px solid var(--div);border-radius:var(--r-sm);
   padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow-sm);
+  display:flex;align-items:flex-start;gap:10px;
 }
+.ledger-item-main{flex:1;min-width:0;}
+.ledger-item-actions{display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;}
 .ledger-item-h{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;font-size:.88rem;}
 .ledger-item-date{color:var(--text3);font-size:.76rem;margin-right:6px;}
 .ledger-item-amt{font-family:var(--font-num);font-size:1.02rem;font-weight:700;color:var(--primary);margin-top:6px;}
 .ledger-item-fx{font-family:var(--font-num);font-size:.76rem;color:var(--text3);font-weight:400;margin-left:6px;}
 .ledger-item-meta{font-size:.76rem;color:var(--text3);margin-top:4px;}
+.ledger-settle-toggle{
+  width:30px;height:30px;border-radius:50%;border:1.5px solid var(--div);background:var(--bg);
+  color:var(--text3);font-size:.85rem;font-weight:700;cursor:pointer;line-height:1;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.ledger-settle-toggle.is-settled{background:var(--secondary);border-color:var(--secondary);color:#fff;}
+.ledger-item.settled{opacity:.72;}
+.ledger-item.settled .ledger-item-amt{text-decoration:line-through;text-decoration-color:var(--text3);}
 .doc-add-form{
   background:var(--bg2);border-radius:var(--r-sm);padding:16px;
   margin-bottom:10px;border:1px solid var(--div);
@@ -692,6 +705,26 @@ input,textarea,select{font-family:var(--font-body)}
 .flight-field span{color:var(--text3);}
 .flight-field b{color:var(--text);font-family:var(--font-num);font-weight:600;}
 .flight-disclaimer{font-size:.7rem;color:var(--text3);margin-top:14px;text-align:left;line-height:1.5;}
+
+/* ── FILE PREVIEW MODAL ── */
+#file-preview-modal{
+  position:fixed;inset:0;z-index:520;
+  background:rgba(30,40,50,.65);backdrop-filter:blur(8px);
+  display:none;align-items:center;justify-content:center;padding:16px;
+}
+#file-preview-modal.open{display:flex}
+.file-preview-sheet{
+  background:var(--card);border-radius:var(--r);padding:16px;width:100%;max-width:560px;
+  box-shadow:0 10px 40px rgba(0,0,0,.25);max-height:90vh;overflow-y:auto;
+}
+.file-preview-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:10px;}
+.file-preview-name{font-size:.9rem;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.file-preview-download{
+  display:block;text-align:center;margin-top:12px;padding:11px;border-radius:var(--r-xs);
+  background:var(--primary);color:#fff;font-size:.85rem;font-weight:700;text-decoration:none;
+}
+.doc-file-open{display:flex;align-items:center;gap:8px;flex:1;min-width:0;cursor:pointer;}
+.doc-file-open:hover .df-name{text-decoration:underline;}
 
 /* ── LOADING / ERROR ── */
 .loading{text-align:center;padding:36px 20px;color:var(--text3);font-size:.85rem}
@@ -795,6 +828,18 @@ input,textarea,select{font-family:var(--font-body)}
     <div class="flight-field"><span>飛行時間</span><b id="flight-dur">—</b></div>
 
     <div class="flight-disclaimer">＊以訂票資料排定時間為準，非即時航班動態；實際登機門與起降時間請以機場現場公告為準。</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ FILE PREVIEW MODAL ═══════════════════════════ -->
+<div id="file-preview-modal">
+  <div class="file-preview-sheet">
+    <div class="file-preview-head">
+      <div class="file-preview-name" id="file-preview-name">檔案預覽</div>
+      <button class="flight-close" onclick="closeFilePreview()">✕</button>
+    </div>
+    <div id="file-preview-body"></div>
+    <a class="file-preview-download" id="file-preview-download" download>⬇ 下載原始檔案</a>
   </div>
 </div>
 
@@ -1186,6 +1231,7 @@ function openFlightModal(code){
 }
 function closeFlightModal(){ document.getElementById('flight-modal').classList.remove('open'); }
 document.getElementById('flight-modal').addEventListener('click', e=>{ if(e.target.id==='flight-modal') closeFlightModal(); });
+document.getElementById('file-preview-modal').addEventListener('click', e=>{ if(e.target.id==='file-preview-modal') closeFilePreview(); });
 
 const DAYS = [
   { date:'2027-01-23', wd:'Sat', title:'Day 1 · 抵達曼谷', theme:'🛬 抵達曼谷 · 開啟旅程', band:'jade',
@@ -1631,10 +1677,35 @@ function renderFileList(type,idx,files){
   if(!files||!files.length) return '';
   return files.map((f,fi)=>`
     <div class="doc-file-item">
-      <span>📄</span>
-      <span class="df-name">${f.name}</span>
+      <span class="doc-file-open" onclick="previewDocFileAt('${type}',${idx},${fi})" title="點選預覽">
+        <span>📄</span>
+        <span class="df-name">${f.name}</span>
+      </span>
       <button class="doc-file-rm" onclick="pwdGate('removeDocFile_wrap','${type}|${idx}|${fi}')">✕</button>
     </div>`).join('');
+}
+
+function previewDocFileAt(type, idx, fi){
+  const data=getDocData();
+  const f = data[type] && data[type][idx] && data[type][idx].files && data[type][idx].files[fi];
+  if(!f) return;
+  const mime = f.type || (f.dataUrl.match(/^data:([^;]+);/)||[])[1] || '';
+  const body=document.getElementById('file-preview-body');
+  if(mime.startsWith('image/')){
+    body.innerHTML = `<img src="${f.dataUrl}" alt="" style="max-width:100%;max-height:74vh;border-radius:10px;display:block;margin:0 auto;">`;
+  } else if(mime==='application/pdf'){
+    body.innerHTML = `<iframe src="${f.dataUrl}" style="width:100%;height:74vh;border:none;border-radius:10px;background:#fff;"></iframe>`;
+  } else {
+    body.innerHTML = `<div style="padding:30px 10px;text-align:center;color:var(--text3);font-size:.85rem;">此檔案類型不支援直接預覽。</div>`;
+  }
+  document.getElementById('file-preview-name').textContent = f.name;
+  document.getElementById('file-preview-download').href = f.dataUrl;
+  document.getElementById('file-preview-download').setAttribute('download', f.name);
+  document.getElementById('file-preview-modal').classList.add('open');
+}
+function closeFilePreview(){
+  document.getElementById('file-preview-modal').classList.remove('open');
+  document.getElementById('file-preview-body').innerHTML='';
 }
 
 function renderDocs(){
@@ -1680,7 +1751,7 @@ function handleFileUpload(type,idx,input){
   files.forEach(f=>{
     const reader=new FileReader();
     reader.onload=e=>{
-      data[type][idx].files.push({name:f.name,size:f.size,dataUrl:e.target.result});
+      data[type][idx].files.push({name:f.name,size:f.size,type:f.type,dataUrl:e.target.result});
       loaded++;
       if(loaded===files.length){saveDocData(data);renderDocs();showToast('已上傳 '+files.length+' 個檔案 ✓');}
     };
@@ -1909,7 +1980,8 @@ function renderLedger(){
   if(!summaryEl||!listEl) return;
   const rate=currentRate;
 
-  let totalTWD=0, totalTHB=0;
+  let totalTWD=0, totalTHB=0;           // lifetime total, all entries
+  let outTWD=0, outTHB=0;               // outstanding total, unsettled only
   const perPersonTWD={SYW:0,ZYW:0,JJ:0};
   const perPersonTHB={SYW:0,ZYW:0,JJ:0};
   LEDGER.forEach(e=>{
@@ -1917,6 +1989,9 @@ function renderLedger(){
     const thb = e.currency==='THB' ? e.amount : (rate ? e.amount*rate : null);
     if(twd!=null) totalTWD+=twd;
     if(thb!=null) totalTHB+=thb;
+    if(e.settled) return; // settled entries no longer count toward what's owed
+    if(twd!=null) outTWD+=twd;
+    if(thb!=null) outTHB+=thb;
     // Split in the entry's own currency so this works even before the
     // exchange rate has loaded (no silent 0 while waiting on the API).
     if(e.split && e.split.length){
@@ -1928,12 +2003,14 @@ function renderLedger(){
 
   summaryEl.innerHTML = `
     <div class="ledger-total-row">
-      <div><div class="ledger-total-label">總支出 TWD</div><div class="ledger-total-value">NT$ ${totalTWD.toLocaleString(undefined,{maximumFractionDigits:0})}</div></div>
-      <div><div class="ledger-total-label">總支出 THB</div><div class="ledger-total-value">฿ ${totalTHB.toLocaleString(undefined,{maximumFractionDigits:0})}</div></div>
+      <div><div class="ledger-total-label">未結清 TWD</div><div class="ledger-total-value">NT$ ${outTWD.toLocaleString(undefined,{maximumFractionDigits:0})}</div></div>
+      <div><div class="ledger-total-label">未結清 THB</div><div class="ledger-total-value">฿ ${outTHB.toLocaleString(undefined,{maximumFractionDigits:0})}</div></div>
     </div>
+    <div class="ledger-per-person-label">未結清分攤（已結清不列入）</div>
     <div class="ledger-per-person">
       ${['SYW','ZYW','JJ'].map(m=>`<div class="ledger-person"><span>${m}</span><b>NT$ ${Math.round(perPersonTWD[m]).toLocaleString()}</b>${perPersonTHB[m] ? '<b class="ledger-person-thb">฿ '+Math.round(perPersonTHB[m]).toLocaleString()+'</b>' : ''}</div>`).join('')}
     </div>
+    <div class="ledger-lifetime-total">累計總支出（含已結清）：NT$ ${totalTWD.toLocaleString(undefined,{maximumFractionDigits:0})} ・ ฿ ${totalTHB.toLocaleString(undefined,{maximumFractionDigits:0})}</div>
     ${rate ? '' : '<div class="ledger-fx-hint" style="margin-top:10px;">尚未取得即時匯率，兩種幣別的加總暫時無法互相換算（各自幣別的分攤金額不受影響）；可先到「匯率」頁籤刷新一次。</div>'}
   `;
 
@@ -1941,15 +2018,27 @@ function renderLedger(){
     const other = e.currency==='TWD'
       ? (rate ? '≈ ฿ '+(e.amount*rate).toFixed(0) : '')
       : (rate ? '≈ NT$ '+(e.amount/rate).toFixed(0) : '');
-    return `<div class="ledger-item">
-      <div class="ledger-item-h">
-        <div><span class="ledger-item-date">${e.date}</span><b>${escLed(e.item)}</b></div>
-        <button class="doc-card-del" onclick="removeLedgerEntry('${e.id}')" title="刪除">✕</button>
+    return `<div class="ledger-item ${e.settled?'settled':''}">
+      <div class="ledger-item-main">
+        <div class="ledger-item-h">
+          <div><span class="ledger-item-date">${e.date}</span><b>${escLed(e.item)}</b></div>
+        </div>
+        <div class="ledger-item-amt">${e.currency==='TWD'?'NT$':'฿'} ${e.amount.toLocaleString()}<span class="ledger-item-fx">${other}</span></div>
+        <div class="ledger-item-meta">分攤：${e.split&&e.split.length?e.split.join(' / '):'—'}${e.note?' ・ '+escLed(e.note):''}</div>
       </div>
-      <div class="ledger-item-amt">${e.currency==='TWD'?'NT$':'฿'} ${e.amount.toLocaleString()}<span class="ledger-item-fx">${other}</span></div>
-      <div class="ledger-item-meta">分攤：${e.split&&e.split.length?e.split.join(' / '):'—'}${e.note?' ・ '+escLed(e.note):''}</div>
+      <div class="ledger-item-actions">
+        <button class="doc-card-del" onclick="removeLedgerEntry('${e.id}')" title="刪除">✕</button>
+        <button class="ledger-settle-toggle ${e.settled?'is-settled':''}" onclick="toggleLedgerSettled('${e.id}')" title="${e.settled?'已結清，點一下改為未結清':'未結清，點一下改為已結清'}">${e.settled?'✓':'○'}</button>
+      </div>
     </div>`;
   }).join('') || '<div class="doc-item empty" style="padding:14px 4px;color:var(--text3);font-size:.85rem;">尚未有記帳紀錄</div>';
+}
+function toggleLedgerSettled(id){
+  const e = LEDGER.find(x=>x.id===id);
+  if(!e) return;
+  e.settled = !e.settled;
+  saveLedger();
+  renderLedger();
 }
 
 (function initLedgerForm(){
