@@ -377,15 +377,9 @@ input,textarea,select{font-family:var(--font-body)}
 /* compact transit/movement segments (e.g. "walk 10 min", "Grab to airport") */
 .ev.transit{padding-bottom:10px;}
 .ev.transit::before{background:var(--bg2);border-color:var(--text3);border-style:dashed;}
-.ev-transit-row{display:flex;align-items:center;gap:6px;padding-right:64px;}
-.ev-transit-ic{font-size:.85rem;flex-shrink:0;}
-.ev-transit-label{font-size:.78rem;color:var(--text2);font-weight:500;}
-.ev-transit-time{
-  margin-left:auto;font-family:var(--font-num);font-size:.66rem;color:var(--text3);
-  flex-shrink:0;padding-left:8px;
-}
-.ev-transit-dd{font-size:.72rem;color:var(--text3);margin-top:2px;padding-left:22px;}
-.ev.transit .ev-links{padding-left:22px;margin-top:4px;}
+.ev-transit-label{font-size:.82rem;color:var(--text2);font-weight:500;margin-top:1px;}
+.ev-transit-dd{font-size:.72rem;color:var(--text3);margin-top:2px;}
+.ev.transit .ev-links{margin-top:4px;}
 .ev.transit .ev-link-btn{padding:2px 8px;font-size:.66rem;border-radius:5px;}
 .add-ev{
   margin-top:18px;padding-top:16px;border-top:1px dashed var(--div);
@@ -1597,11 +1591,8 @@ function renderDayStage(){
       return `<div class="ev transit ${nowFlag?'now':''}">
         <button class="ev-edit" onclick="openEditModal('${day.date}','${ev.id}')" title="編輯">編輯</button>
         <button class="ev-rm" onclick="removeDayEvent_wrap('${day.date}|${ev.id}')" title="移除">✕</button>
-        <div class="ev-transit-row">
-          <span class="ev-transit-ic">${ev.ic}</span>
-          <span class="ev-transit-label">${ev.tt}</span>
-          <span class="ev-transit-time">${ev.t}${nowFlag?'<span class="now-tag">進行中</span>':''}</span>
-        </div>
+        <div class="ev-t"><span class="ev-ic">${ev.ic}</span>${ev.t}${nowFlag?'<span class="now-tag">進行中</span>':''}</div>
+        <div class="ev-transit-label">${ev.tt}</div>
         ${ev.dd?`<div class="ev-transit-dd">${ev.dd}</div>`:''}
         ${linksHtml}
       </div>`;
