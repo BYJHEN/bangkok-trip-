@@ -373,14 +373,6 @@ input,textarea,select{font-family:var(--font-body)}
   color:var(--danger);font-size:.9rem;padding:2px 5px;opacity:.4;
 }
 .ev-rm:hover{opacity:1}
-
-/* compact transit/movement segments (e.g. "walk 10 min", "Grab to airport") */
-.ev.transit{padding-bottom:10px;}
-.ev.transit::before{background:var(--bg2);border-color:var(--text3);border-style:dashed;}
-.ev-transit-label{font-size:.82rem;color:var(--text2);font-weight:500;margin-top:1px;}
-.ev-transit-dd{font-size:.72rem;color:var(--text3);margin-top:2px;}
-.ev.transit .ev-links{margin-top:4px;}
-.ev.transit .ev-link-btn{padding:2px 8px;font-size:.66rem;border-radius:5px;}
 .add-ev{
   margin-top:18px;padding-top:16px;border-top:1px dashed var(--div);
   display:flex;flex-direction:column;gap:9px;
@@ -393,11 +385,6 @@ input,textarea,select{font-family:var(--font-body)}
   width:34px;height:34px;font-size:1rem;cursor:pointer;flex-shrink:0;
 }
 .icon-quickpick button:active{background:var(--bg2);}
-.ev-checkbox{
-  display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--text2);
-  cursor:pointer;line-height:1.4;
-}
-.ev-checkbox input[type=checkbox]{width:16px;height:16px;flex-shrink:0;accent-color:var(--primary);}
 .add-ev-hint{font-size:.68rem;color:var(--text3);line-height:1.5;margin-top:-4px;}
 .add-ev input,.add-ev textarea{
   border:1.5px solid var(--div);background:var(--bg);border-radius:var(--r-xs);
@@ -637,6 +624,48 @@ input,textarea,select{font-family:var(--font-body)}
   border-radius:999px;padding:7px 16px;font-size:.8rem;font-weight:700;cursor:pointer;
 }
 .split-chip.active{background:var(--secondary);border-color:var(--secondary);color:#fff;}
+
+.payer-chips{display:flex;gap:8px;flex-wrap:wrap;}
+.payer-chip{
+  border:1.5px solid var(--div);background:var(--bg);color:var(--text3);
+  border-radius:999px;padding:7px 16px;font-size:.8rem;font-weight:700;cursor:pointer;
+}
+.payer-chip.active{background:var(--accent-a);border-color:var(--accent-a);color:#fff;}
+
+/* balance summary (top of ledger page) */
+.balance-summary{display:flex;gap:8px;margin-bottom:14px;}
+.balance-card{
+  flex:1;background:var(--card);border:1px solid var(--div);border-radius:var(--r-sm);
+  padding:12px 8px;text-align:center;box-shadow:var(--shadow-sm);
+}
+.balance-card .bc-name{font-size:.72rem;color:var(--text3);font-weight:700;letter-spacing:.03em;}
+.balance-card .bc-status{font-size:.66rem;color:var(--text3);margin-top:4px;}
+.balance-card .bc-amt{font-family:var(--font-num);font-size:1.05rem;font-weight:700;margin-top:2px;}
+.balance-card.owed .bc-amt{color:#3d7a5c;}
+.balance-card.owes .bc-amt{color:var(--danger);}
+.balance-card.even .bc-amt{color:var(--text3);}
+.balance-currency-label{font-size:.66rem;color:var(--text3);margin:2px 0 6px 4px;letter-spacing:.03em;}
+
+/* settlement card */
+.settle-card{
+  background:var(--card);border:1px solid var(--div);border-radius:var(--r);
+  padding:16px;margin-bottom:16px;box-shadow:var(--shadow-sm);
+}
+.settle-card-title{font-family:var(--font-head);font-size:.95rem;font-weight:600;color:var(--text);margin-bottom:10px;}
+.settle-row{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:10px 0;border-bottom:1px dashed var(--div);
+}
+.settle-row:last-of-type{border-bottom:none;}
+.settle-row-names{font-size:.86rem;color:var(--text);font-weight:600;}
+.settle-row-names .arrow{color:var(--secondary);margin:0 4px;}
+.settle-row-amt{font-family:var(--font-num);font-size:.9rem;font-weight:700;color:var(--primary);margin-left:auto;margin-right:10px;}
+.settle-paid-btn{
+  border:none;background:var(--bg2);color:var(--text2);border-radius:999px;
+  padding:6px 14px;font-size:.74rem;font-weight:700;cursor:pointer;flex-shrink:0;
+}
+.settle-paid-btn:active{background:var(--secondary);color:#fff;}
+.settle-clear{text-align:center;color:var(--text3);font-size:.85rem;padding:8px 0;}
 .ledger-total-row{display:flex;gap:12px;}
 .ledger-total-row>div{flex:1;background:var(--bg2);border-radius:var(--r-xs);padding:12px;text-align:center;}
 .ledger-total-label{font-size:.68rem;color:var(--text3);font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
@@ -718,9 +747,14 @@ input,textarea,select{font-family:var(--font-body)}
   padding:13px 18px;border:1.5px solid var(--div);border-radius:var(--r-xs);
   background:transparent;color:var(--text3);font-size:.9rem;
 }
+.edit-delete-btn{
+  width:100%;margin-top:10px;padding:12px;border:none;border-radius:var(--r-xs);
+  background:transparent;color:var(--danger);font-size:.82rem;font-weight:600;
+}
+.edit-delete-btn:active{background:#f5e6e6;}
 /* ev edit btn */
 .ev-edit{
-  position:absolute;right:28px;top:0;border:none;background:none;
+  position:absolute;right:0;top:0;border:none;background:none;
   color:var(--primary);font-size:.78rem;padding:2px 6px;opacity:.5;
   font-weight:700;letter-spacing:.02em;
 }
@@ -830,7 +864,6 @@ input,textarea,select{font-family:var(--font-body)}
       <label>備註說明</label>
       <textarea id="edit-ev-dd" rows="3" placeholder="備註、注意事項、聯絡資訊…"></textarea>
     </div>
-    <label class="ev-checkbox"><input type="checkbox" id="edit-ev-transit"> 🚶 標示為交通／移動時間（畫面會顯示成精簡的一行）</label>
     <div class="edit-field">
       <label>Google Maps 連結</label>
       <input type="url" id="edit-ev-gmap" placeholder="https://maps.app.goo.gl/…">
@@ -847,6 +880,7 @@ input,textarea,select{font-family:var(--font-body)}
       <button class="edit-cancel-btn" onclick="closeEditModal()">取消</button>
       <button class="edit-save-btn" onclick="saveEditEvent()">儲存</button>
     </div>
+    <button class="edit-delete-btn" onclick="deleteEditingEvent()">🗑️ 刪除此行程</button>
   </div>
 </div>
 
@@ -986,9 +1020,10 @@ input,textarea,select{font-family:var(--font-body)}
 
   <!-- ═══════ LEDGER ═══════ -->
   <section id="view-ledger" class="view">
-    <div class="page-head"><h2>記帳</h2><div class="sub">共同旅費，一目了然</div></div>
+    <div class="page-head"><h2>記帳</h2><div class="sub">快速分帳，出門玩不算帳</div></div>
 
-    <div class="card" id="ledgerSummary"></div>
+    <div id="ledgerBalanceSummary"></div>
+    <div id="ledgerSettleCard"></div>
 
     <div class="section-label" style="margin:18px 4px 8px;">即時匯率</div>
     <div class="fx-combo">
@@ -1011,9 +1046,9 @@ input,textarea,select{font-family:var(--font-body)}
     </div>
 
     <div class="ledger-add-card">
-      <div class="ledger-add-h">＋ 新增一筆記帳</div>
+      <div class="ledger-add-h">＋ 新增一筆消費</div>
       <div class="doc-field"><label>日期</label><input type="date" id="ledDate"></div>
-      <div class="doc-field"><label>品項</label><input type="text" id="ledItem" placeholder="例如：晚餐、按摩、購物"></div>
+      <div class="doc-field"><label>項目</label><input type="text" id="ledItem" placeholder="例如：晚餐、按摩、購物"></div>
       <div class="doc-field">
         <label>金額</label>
         <div class="ledger-amount-row">
@@ -1026,14 +1061,22 @@ input,textarea,select{font-family:var(--font-body)}
         <div class="ledger-fx-hint" id="ledFxHint"></div>
       </div>
       <div class="doc-field">
-        <label>分攤對象</label>
+        <label>付款人（代墊人）</label>
+        <div class="payer-chips" id="ledPayerChips">
+          <button type="button" class="payer-chip" data-m="SYW" onclick="setLedPayer('SYW')">SYW</button>
+          <button type="button" class="payer-chip" data-m="ZYW" onclick="setLedPayer('ZYW')">ZYW</button>
+          <button type="button" class="payer-chip" data-m="JJ" onclick="setLedPayer('JJ')">JJ</button>
+        </div>
+      </div>
+      <div class="doc-field">
+        <label>分攤成員</label>
         <div class="split-chips" id="ledSplitChips">
           <button type="button" class="split-chip active" data-m="SYW" onclick="toggleSplit('SYW')">SYW</button>
           <button type="button" class="split-chip active" data-m="ZYW" onclick="toggleSplit('ZYW')">ZYW</button>
           <button type="button" class="split-chip active" data-m="JJ" onclick="toggleSplit('JJ')">JJ</button>
         </div>
       </div>
-      <div class="doc-field"><label>備註</label><input type="text" id="ledNote" placeholder="選填"></div>
+      <div class="doc-field"><label>備註（選填）</label><input type="text" id="ledNote" placeholder="選填"></div>
       <button class="doc-card-save" style="width:100%;" onclick="addLedgerEntry()">＋ 新增記錄</button>
     </div>
 
@@ -1263,7 +1306,7 @@ function setSyncStatus(text, cls){
 // Every localStorage key below is treated as one "row" in Supabase.
 // New keys just need to be added to this list to be synced too.
 function allSyncKeys(){
-  return ['bkk2_pack','bkk2_eat','bkk2_buy','bkk2_do','bkk2_docs','bkk2_ledger']
+  return ['bkk2_pack','bkk2_eat','bkk2_buy','bkk2_do','bkk2_docs','bkk2_ledger','bkk2_repayments']
     .concat(DAYS.map(d=>'bkk2_events_'+d.date));
 }
 
@@ -1328,6 +1371,7 @@ function subscribeRealtime(){
       loadDayEventsFromStorage();
       loadStateFromStorage();
       loadLedgerFromStorage();
+      loadRepaymentsFromStorage();
       renderChecklist('pack');
       renderChecklist(currentWishSub);
       renderDayStage();
@@ -1544,10 +1588,9 @@ function addDayEvent(date){
   const g=id=>document.getElementById(id);
   const tt=g('newEvTitle').value.trim();
   if(!tt){g('newEvTitle').focus();return;}
-  const ev={id:'ev-'+date+'-'+Date.now(),t:g('newEvTime').value.trim()||'—',ic:g('newEvIcon').value.trim()||'📌',tt,dd:g('newEvDesc').value.trim(),transit:g('newEvTransit').checked,gmap:g('newEvGmap').value.trim(),latlng:g('newEvLatLng').value.trim(),attachUrl:g('newEvAttach').value.trim()};
+  const ev={id:'ev-'+date+'-'+Date.now(),t:g('newEvTime').value.trim()||'—',ic:g('newEvIcon').value.trim()||'📌',tt,dd:g('newEvDesc').value.trim(),gmap:g('newEvGmap').value.trim(),latlng:g('newEvLatLng').value.trim(),attachUrl:g('newEvAttach').value.trim()};
   DAY_EVENTS[date].push(ev);saveDayEvents(date);
   ['newEvTime','newEvIcon','newEvTitle','newEvDesc','newEvGmap','newEvLatLng','newEvAttach'].forEach(id=>g(id).value='');
-  g('newEvTransit').checked=false;
   renderDayStage();
   refreshCustomMapMarkers();
 }
@@ -1585,22 +1628,9 @@ function renderDayStage(){
     const gmapHtml=ev.gmap?`<a href="${ev.gmap}" target="_blank" rel="noopener" class="ev-link-btn">🗺️ Google Maps</a>`:'';
     const attachHtml=ev.attachUrl?`<a href="${ev.attachUrl}" target="_blank" rel="noopener" class="ev-link-btn ev-link-attach">📎 附件</a>`:'';
     const linksHtml=(gmapHtml||attachHtml)?`<div class="ev-links">${gmapHtml}${attachHtml}</div>`:'';
-    const isTransit = ev.transit===true || /分鐘|步行|走路|搭乘|轉乘|騎車|騎乘/.test(ev.tt||'');
-
-    if(isTransit){
-      return `<div class="ev transit ${nowFlag?'now':''}">
-        <button class="ev-edit" onclick="openEditModal('${day.date}','${ev.id}')" title="編輯">編輯</button>
-        <button class="ev-rm" onclick="removeDayEvent_wrap('${day.date}|${ev.id}')" title="移除">✕</button>
-        <div class="ev-t"><span class="ev-ic">${ev.ic}</span>${ev.t}${nowFlag?'<span class="now-tag">進行中</span>':''}</div>
-        <div class="ev-transit-label">${ev.tt}</div>
-        ${ev.dd?`<div class="ev-transit-dd">${ev.dd}</div>`:''}
-        ${linksHtml}
-      </div>`;
-    }
 
     return `<div class="ev ${nowFlag?'now':''}">
       <button class="ev-edit" onclick="openEditModal('${day.date}','${ev.id}')" title="編輯">編輯</button>
-      <button class="ev-rm" onclick="removeDayEvent_wrap('${day.date}|${ev.id}')" title="移除">✕</button>
       <div class="ev-t"><span class="ev-ic">${ev.ic}</span>${ev.t}${nowFlag?'<span class="now-tag">進行中</span>':''}</div>
       <div class="ev-tt">${ev.tt}</div>
       ${ev.dd?`<div class="ev-dd">${ev.dd}</div>`:''}
@@ -1633,7 +1663,6 @@ function renderDayStage(){
     </div>
     <input id="newEvTitle" placeholder="行程標題">
     <input id="newEvDesc" placeholder="備註說明（選填）">
-    <label class="ev-checkbox"><input type="checkbox" id="newEvTransit"> 🚶 標示為交通／移動時間（畫面會顯示成精簡的一行，不是完整卡片）</label>
     <input id="newEvGmap" type="url" placeholder="Google Maps 連結（選填）">
     <input id="newEvLatLng" type="text" placeholder="地圖座標（選填，格式：13.7437,100.4888）">
     <input id="newEvAttach" type="url" placeholder="附件連結（選填，訂單/票券/QRcode等）">
@@ -1681,7 +1710,6 @@ function openEditModal(date, id){
   g('edit-ev-gmap').value = ev.gmap || '';
   g('edit-ev-latlng').value = ev.latlng || '';
   g('edit-ev-attach').value = ev.attachUrl || '';
-  g('edit-ev-transit').checked = !!ev.transit;
   document.getElementById('edit-modal').classList.add('open');
   setTimeout(()=>g('edit-ev-tt').focus(),120);
 }
@@ -1691,6 +1719,14 @@ function closeEditModal(){
 document.getElementById('edit-modal').addEventListener('click',e=>{
   if(e.target===document.getElementById('edit-modal')) closeEditModal();
 });
+function deleteEditingEvent(){
+  const date=document.getElementById('edit-ev-date').value;
+  const id=document.getElementById('edit-ev-id').value;
+  if(!date||!id) return;
+  if(!confirm('確定要刪除這筆行程嗎？')) return;
+  removeDayEvent(date,id);
+  closeEditModal();
+}
 function saveEditEvent(){
   const g=n=>document.getElementById(n);
   const date=g('edit-ev-date').value, id=g('edit-ev-id').value;
@@ -1701,7 +1737,6 @@ function saveEditEvent(){
     ic:   g('edit-ev-ic').value.trim()||'📌',
     tt,
     dd:   g('edit-ev-dd').value.trim().replace(/\n/g,'<br>'),
-    transit: g('edit-ev-transit').checked,
     gmap: g('edit-ev-gmap').value.trim(),
     latlng: g('edit-ev-latlng').value.trim(),
     attachUrl: g('edit-ev-attach').value.trim(),
@@ -2087,8 +2122,12 @@ function flipConvert(){const tw=document.getElementById('twdInput'),th=document.
 
 /* ═══════════════════════════════════════
    LEDGER (記帳)
+/* ═══════════════════════════════════════
+   LEDGER (記帳) — quick trip expense splitter
 ═══════════════════════════════════════ */
 function escLed(s){ return (s||'').toString().replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+const LEDGER_MEMBERS = ['SYW','ZYW','JJ'];
 
 let LEDGER=[];
 function loadLedgerFromStorage(){
@@ -2100,8 +2139,21 @@ function saveLedger(){
   cloudPush('bkk2_ledger', LEDGER);
 }
 
+// Repayment records — settling a debt never edits the original expense,
+// it just adds an offsetting record and the balance recalculates.
+let REPAYMENTS=[];
+function loadRepaymentsFromStorage(){
+  try{ REPAYMENTS=JSON.parse(localStorage.getItem('bkk2_repayments')||'[]'); }catch(e){ REPAYMENTS=[]; }
+}
+loadRepaymentsFromStorage();
+function saveRepayments(){
+  localStorage.setItem('bkk2_repayments',JSON.stringify(REPAYMENTS));
+  cloudPush('bkk2_repayments', REPAYMENTS);
+}
+
 let ledCurrency='TWD';
-let ledSplit=new Set(['SYW','ZYW','JJ']);
+let ledSplit=new Set(LEDGER_MEMBERS);
+let ledPayer=null;
 
 function setLedCur(cur){
   ledCurrency=cur;
@@ -2113,6 +2165,10 @@ function toggleSplit(m){
   if(ledSplit.has(m)){
     if(ledSplit.size>1){ ledSplit.delete(m); btn.classList.remove('active'); }
   }else{ ledSplit.add(m); btn.classList.add('active'); }
+}
+function setLedPayer(m){
+  ledPayer=m;
+  document.querySelectorAll('.payer-chip').forEach(b=>b.classList.toggle('active', b.dataset.m===m));
 }
 async function updateLedFxHint(){
   const hint=document.getElementById('ledFxHint');
@@ -2126,6 +2182,17 @@ async function updateLedFxHint(){
   else hint.textContent='≈ NT$ '+(amt/rate).toFixed(0)+' TWD';
 }
 
+// Split `amount` into `n` whole-unit shares that sum EXACTLY to amount
+// (largest-remainder style: first `remainder` people get one extra unit).
+function splitAmountExact(amount, n){
+  const total=Math.round(amount);
+  const base=Math.floor(total/n);
+  const remainder=total-base*n;
+  const shares=new Array(n).fill(base);
+  for(let i=0;i<remainder;i++) shares[i]+=1;
+  return shares;
+}
+
 function addLedgerEntry(){
   const itemEl=document.getElementById('ledItem');
   const amtEl=document.getElementById('ledAmount');
@@ -2133,6 +2200,8 @@ function addLedgerEntry(){
   const amount=parseFloat(amtEl.value);
   if(!item){ itemEl.focus(); return; }
   if(!amount){ amtEl.focus(); return; }
+  if(!ledPayer){ showToast('請先選擇「付款人」'); return; }
+  if(!ledSplit.size){ showToast('請至少選擇一位分攤成員'); return; }
   commitLedgerEntry();
 }
 function commitLedgerEntry(){
@@ -2146,16 +2215,17 @@ function commitLedgerEntry(){
     item: itemEl.value.trim(),
     amount: parseFloat(amtEl.value)||0,
     currency: ledCurrency,
-    split: Array.from(ledSplit),
+    payer: ledPayer,
+    participants: Array.from(ledSplit),
     note: noteEl.value.trim()
   };
-  if(!entry.item || !entry.amount) return;
+  if(!entry.item || !entry.amount || !entry.payer || !entry.participants.length) return;
   LEDGER.push(entry);
   saveLedger();
   itemEl.value=''; amtEl.value=''; noteEl.value='';
   document.getElementById('ledFxHint').textContent='';
   renderLedger();
-  showToast('已新增一筆記帳 ✓');
+  showToast('已新增一筆消費 ✓');
 }
 window.commitLedgerEntry=commitLedgerEntry;
 
@@ -2167,71 +2237,141 @@ function removeLedgerEntry_impl(id){
 }
 window.removeLedgerEntry_impl=removeLedgerEntry_impl;
 
-function renderLedger(){
-  const summaryEl=document.getElementById('ledgerSummary');
-  const listEl=document.getElementById('ledgerList');
-  if(!summaryEl||!listEl) return;
-  const rate=currentRate;
-
-  let totalTWD=0, totalTHB=0;           // lifetime total, all entries
-  let outTWD=0, outTHB=0;               // outstanding total, unsettled only
-  const perPersonTWD={SYW:0,ZYW:0,JJ:0};
-  const perPersonTHB={SYW:0,ZYW:0,JJ:0};
+// Balance = everything a person has paid/advanced (as payer, or as a
+// repayment "from") minus everything they owe (their share of each
+// expense, or a repayment "to" reduces what they're owed).
+// Computed per currency — TWD and THB are never mixed together.
+function computeBalances(currency){
+  const balance={}; LEDGER_MEMBERS.forEach(m=>balance[m]=0);
   LEDGER.forEach(e=>{
-    const twd = e.currency==='TWD' ? e.amount : (rate ? e.amount/rate : null);
-    const thb = e.currency==='THB' ? e.amount : (rate ? e.amount*rate : null);
-    if(twd!=null) totalTWD+=twd;
-    if(thb!=null) totalTHB+=thb;
-    if(e.settled) return; // settled entries no longer count toward what's owed
-    if(twd!=null) outTWD+=twd;
-    if(thb!=null) outTHB+=thb;
-    // Split in the entry's own currency so this works even before the
-    // exchange rate has loaded (no silent 0 while waiting on the API).
-    if(e.split && e.split.length){
-      const per = e.amount / e.split.length;
-      const bucket = e.currency==='TWD' ? perPersonTWD : perPersonTHB;
-      e.split.forEach(m=>{ if(bucket[m]!=null) bucket[m]+=per; });
-    }
+    if(e.currency!==currency) return;
+    const participants = e.participants || e.split || []; // `split` = legacy field
+    if(!e.payer || !participants.length) return; // legacy entries with no payer are informational only
+    balance[e.payer]=(balance[e.payer]||0)+e.amount;
+    const shares=splitAmountExact(e.amount, participants.length);
+    participants.forEach((p,idx)=>{ balance[p]=(balance[p]||0)-shares[idx]; });
   });
+  REPAYMENTS.forEach(r=>{
+    if(r.currency!==currency) return;
+    balance[r.from]=(balance[r.from]||0)+r.amount;
+    balance[r.to]=(balance[r.to]||0)-r.amount;
+  });
+  return balance;
+}
 
-  summaryEl.innerHTML = `
-    <div class="ledger-total-row">
-      <div><div class="ledger-total-label">未結清 TWD</div><div class="ledger-total-value">NT$ ${outTWD.toLocaleString(undefined,{maximumFractionDigits:0})}</div></div>
-      <div><div class="ledger-total-label">未結清 THB</div><div class="ledger-total-value">฿ ${outTHB.toLocaleString(undefined,{maximumFractionDigits:0})}</div></div>
-    </div>
-    <div class="ledger-per-person-label">未結清分攤（已結清不列入）</div>
-    <div class="ledger-per-person">
-      ${['SYW','ZYW','JJ'].map(m=>`<div class="ledger-person"><span>${m}</span><b>NT$ ${Math.round(perPersonTWD[m]).toLocaleString()}</b>${perPersonTHB[m] ? '<b class="ledger-person-thb">฿ '+Math.round(perPersonTHB[m]).toLocaleString()+'</b>' : ''}</div>`).join('')}
-    </div>
-    <div class="ledger-lifetime-total">累計總支出（含已結清）：NT$ ${totalTWD.toLocaleString(undefined,{maximumFractionDigits:0})} ・ ฿ ${totalTHB.toLocaleString(undefined,{maximumFractionDigits:0})}</div>
-    ${rate ? '' : '<div class="ledger-fx-hint" style="margin-top:10px;">尚未取得即時匯率，兩種幣別的加總暫時無法互相換算（各自幣別的分攤金額不受影響）；可先到「匯率」頁籤刷新一次。</div>'}
-  `;
+// Minimum-transaction settlement: repeatedly match the biggest creditor
+// with the biggest debtor until everyone is settled.
+function computeSettlements(balance){
+  const EPS=1;
+  const creditors=[], debtors=[];
+  Object.entries(balance).forEach(([name,bal])=>{
+    if(bal>EPS) creditors.push({name,amt:bal});
+    else if(bal<-EPS) debtors.push({name,amt:-bal});
+  });
+  creditors.sort((a,b)=>b.amt-a.amt);
+  debtors.sort((a,b)=>b.amt-a.amt);
+  const out=[]; let i=0,j=0;
+  while(i<debtors.length && j<creditors.length){
+    const pay=Math.min(debtors[i].amt, creditors[j].amt);
+    if(pay>EPS) out.push({from:debtors[i].name, to:creditors[j].name, amount:Math.round(pay)});
+    debtors[i].amt-=pay; creditors[j].amt-=pay;
+    if(debtors[i].amt<=EPS) i++;
+    if(creditors[j].amt<=EPS) j++;
+  }
+  return out;
+}
+
+function markSettlementPaid(from, to, amount, currency){
+  REPAYMENTS.push({id:'rep-'+Date.now(), from, to, amount, currency, date:todayStr()});
+  saveRepayments();
+  renderLedger();
+  showToast(from+' → '+to+' 已記錄還款 ✓');
+}
+window.markSettlementPaid_wrap=function(arg){
+  const[from,to,amount,currency]=arg.split('|');
+  markSettlementPaid(from,to,+amount,currency);
+};
+
+const CUR_SYMBOL={TWD:'NT$',THB:'฿'};
+function activeCurrencies(){
+  const set=new Set();
+  LEDGER.forEach(e=>set.add(e.currency));
+  REPAYMENTS.forEach(r=>set.add(r.currency));
+  if(!set.size) set.add('TWD');
+  return Array.from(set);
+}
+
+function renderLedgerBalanceSummary(){
+  const el=document.getElementById('ledgerBalanceSummary');
+  if(!el) return;
+  const currencies=activeCurrencies();
+  el.innerHTML = currencies.map(cur=>{
+    const balance=computeBalances(cur);
+    const cards=LEDGER_MEMBERS.map(m=>{
+      const bal=Math.round(balance[m]||0);
+      let cls='even', status='已結清', amt='';
+      if(bal>0){ cls='owed'; status='應收'; amt=CUR_SYMBOL[cur]+' '+bal.toLocaleString(); }
+      else if(bal<0){ cls='owes'; status='應付'; amt=CUR_SYMBOL[cur]+' '+Math.abs(bal).toLocaleString(); }
+      return `<div class="balance-card ${cls}"><div class="bc-name">${m}</div><div class="bc-status">${status}</div>${amt?`<div class="bc-amt">${amt}</div>`:''}</div>`;
+    }).join('');
+    return `<div class="balance-currency-label">${cur} 結算</div><div class="balance-summary">${cards}</div>`;
+  }).join('');
+}
+
+function renderLedgerSettleCard(){
+  const el=document.getElementById('ledgerSettleCard');
+  if(!el) return;
+  const currencies=activeCurrencies();
+  el.innerHTML = currencies.map(cur=>{
+    const balance=computeBalances(cur);
+    const settlements=computeSettlements(balance);
+    const rows = settlements.length
+      ? settlements.map(s=>`
+        <div class="settle-row">
+          <div class="settle-row-names">${s.from}<span class="arrow">➜</span>${s.to}</div>
+          <div class="settle-row-amt">${CUR_SYMBOL[cur]} ${s.amount.toLocaleString()}</div>
+          <button class="settle-paid-btn" onclick="markSettlementPaid_wrap('${s.from}|${s.to}|${s.amount}|${cur}')">已付款</button>
+        </div>`).join('')
+      : `<div class="settle-clear">🎉 ${cur} 已全部結清</div>`;
+    return `<div class="settle-card"><div class="settle-card-title">目前結算（${cur}）</div>${rows}</div>`;
+  }).join('');
+}
+
+function renderLedger(){
+  renderLedgerBalanceSummary();
+  renderLedgerSettleCard();
+
+  const listEl=document.getElementById('ledgerList');
+  if(!listEl) return;
+  const rate=currentRate;
 
   listEl.innerHTML = LEDGER.slice().sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id)).map(e=>{
     const other = e.currency==='TWD'
       ? (rate ? '≈ ฿ '+(e.amount*rate).toFixed(0) : '')
       : (rate ? '≈ NT$ '+(e.amount/rate).toFixed(0) : '');
-    return `<div class="ledger-item ${e.settled?'settled':''}">
+    const participants = e.participants || e.split || [];
+    const sym = CUR_SYMBOL[e.currency] || '';
+    let splitInfo;
+    if(e.payer && participants.length){
+      const each = Math.round(e.amount/participants.length);
+      splitInfo = `<b>${escLed(e.payer)} 代墊</b> ・ ${participants.length} 人分攤 ・ 每人 ${sym}${each.toLocaleString()}`;
+    } else {
+      splitInfo = `分攤：${participants.length?participants.join(' / '):'—'}`; // legacy entry, no payer on record
+    }
+    return `<div class="ledger-item">
       <div class="ledger-item-main">
         <div class="ledger-item-h">
           <div><span class="ledger-item-date">${e.date}</span><b>${escLed(e.item)}</b></div>
         </div>
-        <div class="ledger-item-amt">${e.currency==='TWD'?'NT$':'฿'} ${e.amount.toLocaleString()}<span class="ledger-item-fx">${other}</span></div>
-        <div class="ledger-item-meta">分攤：${e.split&&e.split.length?e.split.join(' / '):'—'}${e.note?' ・ '+escLed(e.note):''}</div>
+        <div class="ledger-item-amt">${sym} ${e.amount.toLocaleString()}<span class="ledger-item-fx">${other}</span></div>
+        <div class="ledger-item-meta">${splitInfo}</div>
+        ${e.note?`<div class="ledger-item-meta">${escLed(e.note)}</div>`:''}
       </div>
       <div class="ledger-item-actions">
         <button class="doc-card-del" onclick="removeLedgerEntry('${e.id}')" title="刪除">✕</button>
-        <button class="ledger-settle-toggle ${e.settled?'is-settled':''}" onclick="toggleLedgerSettled('${e.id}')" title="${e.settled?'已結清，點一下改為未結清':'未結清，點一下改為已結清'}">${e.settled?'✓':'○'}</button>
       </div>
     </div>`;
   }).join('') || '<div class="doc-item empty" style="padding:14px 4px;color:var(--text3);font-size:.85rem;">尚未有記帳紀錄</div>';
-}
-function toggleLedgerSettled(id){
-  const e = LEDGER.find(x=>x.id===id);
-  if(!e) return;
-  e.settled = !e.settled;
-  saveLedger();
-  renderLedger();
 }
 
 (function initLedgerForm(){
@@ -2299,6 +2439,7 @@ async function bootstrap(){
   loadDayEventsFromStorage();
   loadStateFromStorage();
   loadLedgerFromStorage();
+  loadRepaymentsFromStorage();
   init();
   subscribeRealtime();
 }
@@ -2316,6 +2457,7 @@ document.addEventListener('visibilitychange', ()=>{
     loadDayEventsFromStorage();
     loadStateFromStorage();
     loadLedgerFromStorage();
+    loadRepaymentsFromStorage();
     renderChecklist('pack');
     renderChecklist(currentWishSub);
     renderDayStage();
