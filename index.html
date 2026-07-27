@@ -538,11 +538,23 @@ input,textarea,select{font-family:var(--font-body)}
 }
 .doc-field input:focus,.doc-field textarea:focus{border-color:var(--primary)}
 .doc-field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
-.doc-attach-link{
-  display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;
-  color:var(--primary);text-decoration:none;margin-bottom:4px;
+.doc-card-view{background:var(--bg2);}
+.doc-card-edit{
+  border:1.5px solid var(--primary);background:transparent;color:var(--primary);
+  border-radius:999px;padding:5px 14px;font-size:.75rem;font-weight:600;flex-shrink:0;cursor:pointer;
 }
-.doc-attach-link:hover{text-decoration:underline;}
+.doc-view-row{padding:8px 0;border-bottom:1px dashed var(--div);}
+.doc-view-row:last-child{border-bottom:none;}
+.doc-view-label{font-size:.66rem;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px;}
+.doc-view-value{font-size:.88rem;color:var(--text);white-space:pre-wrap;}
+.doc-view-content{font-size:.88rem;color:var(--text);white-space:pre-wrap;line-height:1.6;margin-bottom:8px;}
+.doc-view-empty{font-size:.8rem;color:var(--text3);padding:6px 0;}
+.doc-cloud-row{margin-top:6px;padding-top:10px;border-top:1px solid var(--div);}
+.doc-cloud-link{
+  display:block;font-size:.78rem;color:var(--primary);text-decoration:none;font-weight:600;
+  word-break:break-all;
+}
+.doc-cloud-link:hover{text-decoration:underline;}
 .doc-card-footer{display:flex;justify-content:flex-end;margin-top:12px;padding-top:12px;border-top:1px solid var(--div)}
 .doc-card-save{
   border:none;background:var(--primary);color:#fff;border-radius:999px;
@@ -1554,8 +1566,32 @@ function getDocData(){
 }
 function saveDocData(d){localStorage.setItem('bkk2_docs',JSON.stringify(d));}
 
+function renderAttachRow(url){
+  if(!url) return '';
+  return `<div class="doc-view-row doc-cloud-row">
+    <div class="doc-view-label">☁️ 雲端存取</div>
+    <a class="doc-cloud-link" href="${url}" target="_blank" rel="noopener">${escLed(url)}</a>
+  </div>`;
+}
+
 function renderDocEntry(type,entry,idx){
   const schema=DOC_SCHEMA[type];
+  const editing = entry.editing===false ? false : true;
+
+  if(!editing){
+    const rows = schema.fields.filter(f=>f.id!=='attachUrl' && entry[f.id]).map(f=>
+      `<div class="doc-view-row"><div class="doc-view-label">${f.label}</div><div class="doc-view-value">${escLed(entry[f.id])}</div></div>`
+    ).join('');
+    return `<div class="doc-card doc-card-view" id="card-${type}-${idx}">
+      <div class="doc-card-header">
+        <div class="doc-card-name">${schema.label} #${idx+1}</div>
+        <button class="doc-card-edit" onclick="editDocEntry_wrap('${type}|${idx}')" title="編輯">✏️ 編輯</button>
+      </div>
+      ${rows || '<div class="doc-view-empty">尚無內容</div>'}
+      ${renderAttachRow(entry.attachUrl)}
+    </div>`;
+  }
+
   const fieldsHtml=schema.fields.map(f=>{
     const val=(entry[f.id]||'').replace(/"/g,'&quot;');
     if(f.type==='textarea'){
@@ -1564,15 +1600,12 @@ function renderDocEntry(type,entry,idx){
     return `<div class="doc-field"><label>${f.label}</label><input type="text" data-field="${f.id}" value="${val}" onchange="updateDocField('${type}',${idx},'${f.id}',this.value)" placeholder="${f.placeholder}"></div>`;
   }).join('');
 
-  const linkHtml = entry.attachUrl ? `<a class="doc-attach-link" href="${entry.attachUrl}" target="_blank" rel="noopener">🔗 開啟附件連結</a>` : '';
-
   return `<div class="doc-card" id="card-${type}-${idx}">
     <div class="doc-card-header">
       <div class="doc-card-name">${schema.label} #${idx+1}</div>
       <button class="doc-card-del" onclick="deleteDocEntry_wrap('${type}|${idx}')" title="刪除">✕</button>
     </div>
     ${fieldsHtml}
-    ${linkHtml}
     <div class="doc-card-footer">
       <button class="doc-card-save" onclick="saveDocEntry_wrap('${type}|${idx}')">✓ 儲存資料</button>
     </div>
@@ -1580,7 +1613,19 @@ function renderDocEntry(type,entry,idx){
 }
 
 function renderCustomEntry(entry,idx){
-  const linkHtml = entry.attachUrl ? `<a class="doc-attach-link" href="${entry.attachUrl}" target="_blank" rel="noopener">🔗 開啟附件連結</a>` : '';
+  const editing = entry.editing===false ? false : true;
+
+  if(!editing){
+    return `<div class="doc-card doc-card-view" id="card-custom-${idx}">
+      <div class="doc-card-header">
+        <div class="doc-card-name">${escLed(entry.category)||'文件 #'+(idx+1)}</div>
+        <button class="doc-card-edit" onclick="editDocEntry_wrap('custom|${idx}')" title="編輯">✏️ 編輯</button>
+      </div>
+      ${entry.content ? `<div class="doc-view-content">${escLed(entry.content)}</div>` : '<div class="doc-view-empty">尚無內容</div>'}
+      ${renderAttachRow(entry.attachUrl)}
+    </div>`;
+  }
+
   return `<div class="doc-card" id="card-custom-${idx}">
     <div class="doc-card-header">
       <div class="doc-card-name">${entry.category||'文件 #'+(idx+1)}</div>
@@ -1589,7 +1634,6 @@ function renderCustomEntry(entry,idx){
     <div class="doc-field"><label>類別名稱</label><input type="text" data-field="category" value="${(entry.category||'').replace(/"/g,'&quot;')}" onchange="updateDocField('custom',${idx},'category',this.value)" placeholder="例如：飯店訂房確認"></div>
     <div class="doc-field"><label>文件內容</label><textarea rows="3" data-field="content" onchange="updateDocField('custom',${idx},'content',this.value)" placeholder="訂單號碼、聯絡資訊、備註…">${entry.content||''}</textarea></div>
     <div class="doc-field"><label>附件網址</label><input type="text" data-field="attachUrl" value="${(entry.attachUrl||'').replace(/"/g,'&quot;')}" onchange="updateDocField('custom',${idx},'attachUrl',this.value)" placeholder="https://drive.google.com/…"></div>
-    ${linkHtml}
     <div class="doc-card-footer">
       <button class="doc-card-save" onclick="saveDocEntry_wrap('custom|${idx}')">✓ 儲存資料</button>
     </div>
@@ -1610,11 +1654,11 @@ function renderDocs(){
 
 function addDocEntry(type){
   const data=getDocData();
-  data[type].push({});saveDocData(data);renderDocs();
+  data[type].push({editing:true});saveDocData(data);renderDocs();
 }
 function addDocCategory(){
   const data=getDocData();
-  data.custom.push({category:'',content:'',attachUrl:''});saveDocData(data);renderDocs();
+  data.custom.push({category:'',content:'',attachUrl:'',editing:true});saveDocData(data);renderDocs();
 }
 window.addDocCategory=addDocCategory;
 
@@ -1630,6 +1674,16 @@ function deleteDocEntry(type,idx){
 }
 window.deleteDocEntry_wrap=function(arg){const[t,i]=arg.split('|');deleteDocEntry(t,+i);};
 
+function editDocEntry(type,idx){
+  const data=getDocData();
+  const entry = type==='custom' ? data.custom[idx] : (data[type] && data[type][idx]);
+  if(!entry) return;
+  entry.editing=true;
+  saveDocData(data);
+  renderDocs();
+}
+window.editDocEntry_wrap=function(arg){ const[t,i]=arg.split('|'); editDocEntry(t,+i); };
+
 function saveDocEntry(type,idx){
   const card=document.getElementById('card-'+type+'-'+idx);
   if(!card) return;
@@ -1637,7 +1691,9 @@ function saveDocEntry(type,idx){
   const entry = type==='custom' ? data.custom[idx] : (data[type]&&data[type][idx]);
   if(!entry) return;
   card.querySelectorAll('[data-field]').forEach(el=>{ entry[el.dataset.field]=el.value; });
+  entry.editing=false;
   saveDocData(data);
+  renderDocs();
   showToast('已儲存 ✓');
 }
 window.saveDocEntry_wrap=function(arg){ const[t,i]=arg.split('|'); saveDocEntry(t,+i); };
