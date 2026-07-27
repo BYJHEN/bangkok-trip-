@@ -565,6 +565,10 @@ input,textarea,select{font-family:var(--font-body)}
   padding:2px 4px;opacity:.4;flex-shrink:0;
 }
 .doc-card-del:hover{opacity:1;color:var(--danger)}
+.ev-edit-sm{
+  border:1.5px solid var(--primary);background:transparent;color:var(--primary);
+  border-radius:999px;padding:5px 12px;font-size:.72rem;font-weight:700;cursor:pointer;
+}
 .doc-field{margin-bottom:10px}
 .doc-field label{
   display:block;font-size:.68rem;font-weight:700;color:var(--text3);
@@ -718,6 +722,12 @@ input,textarea,select{font-family:var(--font-body)}
   display:none;align-items:flex-end;justify-content:center;
 }
 #edit-modal.open{display:flex}
+#ledger-edit-modal{
+  position:fixed;inset:0;z-index:500;
+  background:rgba(30,40,50,.55);backdrop-filter:blur(8px);
+  display:none;align-items:flex-end;justify-content:center;
+}
+#ledger-edit-modal.open{display:flex}
 .edit-sheet{
   background:var(--card);border-radius:28px 28px 0 0;
   padding:24px 20px 40px;width:100%;max-width:540px;
@@ -881,6 +891,58 @@ input,textarea,select{font-family:var(--font-body)}
       <button class="edit-save-btn" onclick="saveEditEvent()">儲存</button>
     </div>
     <button class="edit-delete-btn" onclick="deleteEditingEvent()">🗑️ 刪除此行程</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ LEDGER EDIT MODAL ═══════════════════════════ -->
+<div id="ledger-edit-modal">
+  <div class="edit-sheet">
+    <h3>✏️ 編輯消費紀錄</h3>
+    <div class="edit-sub">修改後點「儲存」即可套用變更</div>
+    <input type="hidden" id="led-edit-id">
+    <div class="edit-field">
+      <label>日期</label>
+      <input type="date" id="led-edit-date">
+    </div>
+    <div class="edit-field">
+      <label>項目</label>
+      <input type="text" id="led-edit-item" placeholder="例如：晚餐、按摩、購物">
+    </div>
+    <div class="edit-field">
+      <label>金額</label>
+      <div class="ledger-amount-row">
+        <input type="text" inputmode="decimal" id="led-edit-amount" placeholder="0">
+        <div class="cur-toggle" id="ledEditCurToggle">
+          <button type="button" class="cur-opt" data-cur="TWD" onclick="setLedEditCur('TWD')">TWD</button>
+          <button type="button" class="cur-opt" data-cur="THB" onclick="setLedEditCur('THB')">THB</button>
+        </div>
+      </div>
+    </div>
+    <div class="edit-field">
+      <label>付款人（代墊人）</label>
+      <div class="payer-chips" id="ledEditPayerChips">
+        <button type="button" class="payer-chip" data-m="SYW" onclick="setLedEditPayer('SYW')">SYW</button>
+        <button type="button" class="payer-chip" data-m="ZYW" onclick="setLedEditPayer('ZYW')">ZYW</button>
+        <button type="button" class="payer-chip" data-m="JJ" onclick="setLedEditPayer('JJ')">JJ</button>
+      </div>
+    </div>
+    <div class="edit-field">
+      <label>分攤成員</label>
+      <div class="split-chips" id="ledEditSplitChips">
+        <button type="button" class="split-chip" data-m="SYW" onclick="toggleLedEditSplit('SYW')">SYW</button>
+        <button type="button" class="split-chip" data-m="ZYW" onclick="toggleLedEditSplit('ZYW')">ZYW</button>
+        <button type="button" class="split-chip" data-m="JJ" onclick="toggleLedEditSplit('JJ')">JJ</button>
+      </div>
+    </div>
+    <div class="edit-field">
+      <label>備註</label>
+      <input type="text" id="led-edit-note" placeholder="選填">
+    </div>
+    <div class="edit-actions">
+      <button class="edit-cancel-btn" onclick="closeLedgerEditModal()">取消</button>
+      <button class="edit-save-btn" onclick="saveLedgerEdit()">儲存</button>
+    </div>
+    <button class="edit-delete-btn" onclick="deleteEditingLedgerEntry()">🗑️ 刪除這筆消費</button>
   </div>
 </div>
 
@@ -2237,6 +2299,86 @@ function removeLedgerEntry_impl(id){
 }
 window.removeLedgerEntry_impl=removeLedgerEntry_impl;
 
+/* ── Ledger edit modal (delete lives here, not on the card, to avoid mis-taps) ── */
+let ledEditCurrency='TWD';
+let ledEditPayer=null;
+let ledEditSplit=new Set();
+
+function setLedEditCur(cur){
+  ledEditCurrency=cur;
+  document.querySelectorAll('#ledEditCurToggle .cur-opt').forEach(b=>b.classList.toggle('active',b.dataset.cur===cur));
+}
+function setLedEditPayer(m){
+  ledEditPayer=m;
+  document.querySelectorAll('#ledEditPayerChips .payer-chip').forEach(b=>b.classList.toggle('active', b.dataset.m===m));
+}
+function toggleLedEditSplit(m){
+  const btn=document.querySelector('#ledEditSplitChips .split-chip[data-m="'+m+'"]');
+  if(ledEditSplit.has(m)){
+    if(ledEditSplit.size>1){ ledEditSplit.delete(m); btn.classList.remove('active'); }
+  }else{ ledEditSplit.add(m); btn.classList.add('active'); }
+}
+
+function openLedgerEditModal(id){
+  const e=LEDGER.find(x=>x.id===id);
+  if(!e) return;
+  document.getElementById('led-edit-id').value=e.id;
+  document.getElementById('led-edit-date').value=e.date||todayStr();
+  document.getElementById('led-edit-item').value=e.item||'';
+  document.getElementById('led-edit-amount').value=e.amount||'';
+  document.getElementById('led-edit-note').value=e.note||'';
+
+  ledEditCurrency=e.currency||'TWD';
+  setLedEditCur(ledEditCurrency);
+
+  ledEditPayer=e.payer||null;
+  document.querySelectorAll('#ledEditPayerChips .payer-chip').forEach(b=>b.classList.toggle('active', b.dataset.m===ledEditPayer));
+
+  const participants=e.participants||e.split||[];
+  ledEditSplit=new Set(participants.length?participants:LEDGER_MEMBERS);
+  document.querySelectorAll('#ledEditSplitChips .split-chip').forEach(b=>b.classList.toggle('active', ledEditSplit.has(b.dataset.m)));
+
+  document.getElementById('ledger-edit-modal').classList.add('open');
+}
+function closeLedgerEditModal(){
+  document.getElementById('ledger-edit-modal').classList.remove('open');
+}
+document.getElementById('ledger-edit-modal').addEventListener('click', e=>{
+  if(e.target===document.getElementById('ledger-edit-modal')) closeLedgerEditModal();
+});
+
+function saveLedgerEdit(){
+  const id=document.getElementById('led-edit-id').value;
+  const e=LEDGER.find(x=>x.id===id);
+  if(!e) return;
+  const item=document.getElementById('led-edit-item').value.trim();
+  const amount=parseFloat(document.getElementById('led-edit-amount').value);
+  if(!item){ document.getElementById('led-edit-item').focus(); return; }
+  if(!amount){ document.getElementById('led-edit-amount').focus(); return; }
+  if(!ledEditPayer){ showToast('請先選擇「付款人」'); return; }
+  if(!ledEditSplit.size){ showToast('請至少選擇一位分攤成員'); return; }
+  e.date=document.getElementById('led-edit-date').value||todayStr();
+  e.item=item;
+  e.amount=amount;
+  e.currency=ledEditCurrency;
+  e.payer=ledEditPayer;
+  e.participants=Array.from(ledEditSplit);
+  delete e.split; // migrate legacy field name
+  e.note=document.getElementById('led-edit-note').value.trim();
+  saveLedger();
+  closeLedgerEditModal();
+  renderLedger();
+  showToast('已儲存 ✓');
+}
+
+function deleteEditingLedgerEntry(){
+  const id=document.getElementById('led-edit-id').value;
+  if(!id) return;
+  if(!confirm('確定要刪除這筆消費紀錄嗎？')) return;
+  removeLedgerEntry_impl(id);
+  closeLedgerEditModal();
+}
+
 // Balance = everything a person has paid/advanced (as payer, or as a
 // repayment "from") minus everything they owe (their share of each
 // expense, or a repayment "to" reduces what they're owed).
@@ -2368,7 +2510,7 @@ function renderLedger(){
         ${e.note?`<div class="ledger-item-meta">${escLed(e.note)}</div>`:''}
       </div>
       <div class="ledger-item-actions">
-        <button class="doc-card-del" onclick="removeLedgerEntry('${e.id}')" title="刪除">✕</button>
+        <button class="ev-edit-sm" onclick="openLedgerEditModal('${e.id}')" title="編輯">編輯</button>
       </div>
     </div>`;
   }).join('') || '<div class="doc-item empty" style="padding:14px 4px;color:var(--text3);font-size:.85rem;">尚未有記帳紀錄</div>';
