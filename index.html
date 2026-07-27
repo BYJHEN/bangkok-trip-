@@ -169,6 +169,18 @@ input,textarea,select{font-family:var(--font-body)}
 .sync-status.syncing{background:#eef1f4;color:var(--secondary);}
 .sync-status.offline{background:var(--bg2);color:var(--text3);}
 .sync-status.error{background:#f5e6e6;color:var(--danger);}
+
+.update-banner{
+  position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0) + 14px);
+  transform:translateX(-50%);z-index:400;
+  background:var(--primary);color:#fff;padding:10px 12px 10px 16px;border-radius:999px;
+  font-size:.8rem;font-weight:600;box-shadow:var(--shadow);
+  display:flex;align-items:center;gap:10px;white-space:nowrap;
+}
+.update-banner button{
+  border:none;background:#fff;color:var(--primary);border-radius:999px;
+  padding:6px 14px;font-size:.78rem;font-weight:700;cursor:pointer;
+}
 .tabs{
   display:flex;gap:6px;overflow-x:auto;padding:0 16px 12px;
   scrollbar-width:none;
@@ -1218,14 +1230,25 @@ function allSyncKeys(){
     .concat(DAYS.map(d=>'bkk2_events_'+d.date));
 }
 
+// Each key has a companion "<key>__ts" entry recording when it was last
+// written *locally*. This prevents cloudPull from ever clobbering a fresh
+// local edit with stale cloud data (e.g. if you save then refresh before
+// the upload finishes, or the upload silently failed).
+function localTs(key){ return parseInt(localStorage.getItem(key+'__ts')||'0',10); }
+function setLocalTs(key, ts){ localStorage.setItem(key+'__ts', String(ts)); }
+
 async function cloudPull(){
   if(!cloudEnabled){ setSyncStatus('☁️ 尚未設定雲端同步','offline'); return; }
   setSyncStatus('🔄 同步中…','syncing');
   try{
-    const { data, error } = await supa.from(SYNC_TABLE).select('key,value').in('key', allSyncKeys());
+    const { data, error } = await supa.from(SYNC_TABLE).select('key,value,updated_at').in('key', allSyncKeys());
     if(error) throw error;
     (data||[]).forEach(row=>{
-      localStorage.setItem(row.key, JSON.stringify(row.value));
+      const cloudTs = row.updated_at ? new Date(row.updated_at).getTime() : 0;
+      if(cloudTs > localTs(row.key)){
+        localStorage.setItem(row.key, JSON.stringify(row.value));
+        setLocalTs(row.key, cloudTs);
+      }
     });
     setSyncStatus('☁️ 已同步','online');
   }catch(e){
@@ -1234,13 +1257,23 @@ async function cloudPull(){
   }
 }
 
+const _pushChains = {};
 function cloudPush(key, value){
+  // Record the local write time immediately (not after the network call
+  // resolves) so a fast refresh can never race ahead of it.
+  const now = Date.now();
+  setLocalTs(key, now);
   if(!cloudEnabled) return;
-  supa.from(SYNC_TABLE).upsert({ key, value, updated_at:new Date().toISOString() })
-    .then(({error})=>{
-      if(error){ console.warn('cloudPush failed', key, error); setSyncStatus('⚠️ 上傳失敗，稍後重試','error'); }
-      else setSyncStatus('☁️ 已同步','online');
-    });
+  // Chain pushes per key so that if you edit the same day/list twice in a
+  // row, the two network requests can never land at Supabase out of order
+  // (which would otherwise let an older save silently overwrite a newer one).
+  const prev = _pushChains[key] || Promise.resolve();
+  _pushChains[key] = prev.then(()=>
+    supa.from(SYNC_TABLE).upsert({ key, value, updated_at:new Date(now).toISOString() })
+  ).then(({error})=>{
+    if(error){ console.warn('cloudPush failed', key, error); setSyncStatus('⚠️ 上傳失敗，稍後重試','error'); }
+    else setSyncStatus('☁️ 已同步','online');
+  }).catch(e=>console.warn('cloudPush chain error', key, e));
 }
 
 function subscribeRealtime(){
@@ -1250,7 +1283,10 @@ function subscribeRealtime(){
       const row = payload.new || payload.old;
       if(!row || !allSyncKeys().includes(row.key)) return;
       if(payload.new && payload.new.value !== undefined){
+        const cloudTs = payload.new.updated_at ? new Date(payload.new.updated_at).getTime() : Date.now();
+        if(cloudTs <= localTs(row.key)) return; // stale echo (e.g. our own push) — ignore
         localStorage.setItem(row.key, JSON.stringify(payload.new.value));
+        setLocalTs(row.key, cloudTs);
       }
       loadDayEventsFromStorage();
       loadStateFromStorage();
@@ -2194,9 +2230,61 @@ async function bootstrap(){
 }
 bootstrap();
 
-/* PWA */
+/* ═══════════════════════════════════════
+   FOREGROUND REFRESH — when you switch back to the app (from another app,
+   the lock screen, or another tab) it silently re-pulls the latest data
+   from the cloud and re-renders, so you don't have to restart to see
+   changes another family member made while the app was in the background.
+═══════════════════════════════════════ */
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState !== 'visible') return;
+  cloudPull().then(()=>{
+    loadDayEventsFromStorage();
+    loadStateFromStorage();
+    loadLedgerFromStorage();
+    renderChecklist('pack');
+    renderChecklist(currentWishSub);
+    renderDayStage();
+    renderDocs();
+    renderLedger();
+  });
+});
+
+/* ═══════════════════════════════════════
+   PWA — service worker registration + update banner.
+   The service worker itself always fetches fresh HTML when the app loads
+   (network-first), so a normal reopen already gets the newest version.
+   This adds one more thing: if a new version gets deployed *while the app
+   is already open*, a small banner offers a one-tap refresh instead of
+   requiring you to fully close and reopen the app.
+═══════════════════════════════════════ */
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(()=>{});});
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('./sw.js').then(reg=>{
+      // Check for a newer sw.js periodically while the app stays open.
+      setInterval(()=>{ reg.update().catch(()=>{}); }, 60000);
+
+      function showUpdateBanner(){
+        if(document.getElementById('updateBanner')) return;
+        const el = document.createElement('div');
+        el.id = 'updateBanner';
+        el.className = 'update-banner';
+        el.innerHTML = '⬆️ 有新版本可用　<button id="updateBannerBtn">立即更新</button>';
+        document.body.appendChild(el);
+        document.getElementById('updateBannerBtn').onclick = ()=> window.location.reload();
+      }
+
+      reg.addEventListener('updatefound', ()=>{
+        const nw = reg.installing;
+        if(!nw) return;
+        nw.addEventListener('statechange', ()=>{
+          if(nw.state === 'installed' && navigator.serviceWorker.controller){
+            showUpdateBanner();
+          }
+        });
+      });
+    }).catch(()=>{});
+  });
 }
 </script>
 </body>
