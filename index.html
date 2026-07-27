@@ -161,6 +161,14 @@ input,textarea,select{font-family:var(--font-body)}
   color:var(--text);letter-spacing:.01em;
 }
 .brand-meta{font-size:.68rem;color:var(--text3);margin-top:2px;letter-spacing:.04em}
+.sync-status{
+  font-size:.62rem;font-weight:700;padding:4px 9px;border-radius:999px;flex-shrink:0;
+  background:var(--bg2);color:var(--text3);white-space:nowrap;
+}
+.sync-status.online{background:#e4efe8;color:#3d7a5c;}
+.sync-status.syncing{background:#eef1f4;color:var(--secondary);}
+.sync-status.offline{background:var(--bg2);color:var(--text3);}
+.sync-status.error{background:#f5e6e6;color:var(--danger);}
 .tabs{
   display:flex;gap:6px;overflow-x:auto;padding:0 16px 12px;
   scrollbar-width:none;
@@ -821,6 +829,7 @@ input,textarea,select{font-family:var(--font-body)}
         <div class="brand-name">🇹🇭 2027 曼谷FBG旅遊</div>
         <div class="brand-meta">01.23–01.27 · SYW · ZYW · JJ</div>
       </div>
+      <div class="sync-status" id="syncStatus">☁️ 尚未設定雲端同步</div>
     </div>
     <div class="tabs" id="tabs">
       <button class="tab-btn" data-tab="home"      onclick="go('home')"><span class="tab-icon">🏠</span>首頁</button>
@@ -1114,6 +1123,7 @@ input,textarea,select{font-family:var(--font-body)}
 </div><!-- /app -->
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
 /* ═══════════════════════════════════════
    PASSWORD SYSTEM
@@ -1147,6 +1157,86 @@ function closePwdModal(){
 }
 document.getElementById('pwd-modal-input').addEventListener('keydown',e=>{if(e.key==='Enter') confirmPwd();});
 document.getElementById('pwd-modal').addEventListener('click',e=>{if(e.target===document.getElementById('pwd-modal')) closePwdModal();});
+
+/* ═══════════════════════════════════════
+   CLOUD SYNC (Supabase) — optional
+   Fill in SUPABASE_URL / SUPABASE_ANON_KEY below (see setup guide)
+   to let SYW / ZYW / JJ share the same live data across devices.
+   Leave them blank and the app works exactly as before, local-only.
+═══════════════════════════════════════ */
+const SUPABASE_URL = 'https://vtpxaftoujdyfpnhinzn.supabase.co';       // e.g. https://xxxxxxxx.supabase.co
+const SUPABASE_ANON_KEY = 'sb_publishable_cedaHHarcA-kzzO_cn-sbQ_Z5EsU6yK';
+
+const SYNC_TABLE = 'trip_kv';
+let supa = null;
+let cloudEnabled = false;
+try{
+  if(SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL.startsWith('https://') && window.supabase){
+    supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    cloudEnabled = true;
+  }
+}catch(e){ console.warn('Supabase init failed', e); }
+
+function setSyncStatus(text, cls){
+  const el = document.getElementById('syncStatus');
+  if(!el) return;
+  el.textContent = text;
+  el.className = 'sync-status '+(cls||'');
+}
+
+// Every localStorage key below is treated as one "row" in Supabase.
+// New keys just need to be added to this list to be synced too.
+function allSyncKeys(){
+  return ['bkk2_pack','bkk2_eat','bkk2_buy','bkk2_do','bkk2_docs','bkk2_ledger']
+    .concat(DAYS.map(d=>'bkk2_events_'+d.date));
+}
+
+async function cloudPull(){
+  if(!cloudEnabled){ setSyncStatus('☁️ 尚未設定雲端同步','offline'); return; }
+  setSyncStatus('🔄 同步中…','syncing');
+  try{
+    const { data, error } = await supa.from(SYNC_TABLE).select('key,value').in('key', allSyncKeys());
+    if(error) throw error;
+    (data||[]).forEach(row=>{
+      localStorage.setItem(row.key, JSON.stringify(row.value));
+    });
+    setSyncStatus('☁️ 已同步','online');
+  }catch(e){
+    console.warn('cloudPull failed', e);
+    setSyncStatus('⚠️ 雲端連線失敗，使用本機資料','error');
+  }
+}
+
+function cloudPush(key, value){
+  if(!cloudEnabled) return;
+  supa.from(SYNC_TABLE).upsert({ key, value, updated_at:new Date().toISOString() })
+    .then(({error})=>{
+      if(error){ console.warn('cloudPush failed', key, error); setSyncStatus('⚠️ 上傳失敗，稍後重試','error'); }
+      else setSyncStatus('☁️ 已同步','online');
+    });
+}
+
+function subscribeRealtime(){
+  if(!cloudEnabled) return;
+  supa.channel('trip_kv_changes')
+    .on('postgres_changes', { event:'*', schema:'public', table:SYNC_TABLE }, (payload)=>{
+      const row = payload.new || payload.old;
+      if(!row || !allSyncKeys().includes(row.key)) return;
+      if(payload.new && payload.new.value !== undefined){
+        localStorage.setItem(row.key, JSON.stringify(payload.new.value));
+      }
+      loadDayEventsFromStorage();
+      loadStateFromStorage();
+      loadLedgerFromStorage();
+      renderChecklist('pack');
+      renderChecklist(currentWishSub);
+      renderDayStage();
+      renderDocs();
+      renderLedger();
+      setSyncStatus('☁️ 已更新（其他裝置）','online');
+    })
+    .subscribe();
+}
 
 /* ═══════════════════════════════════════
    DATA
@@ -1326,14 +1416,21 @@ let currentDayIndex=0;
 })();
 
 const DAY_EVENTS={};
-DAYS.forEach(day=>{
-  const key='bkk2_events_'+day.date;
-  try{const raw=localStorage.getItem(key);if(raw){DAY_EVENTS[day.date]=JSON.parse(raw);return;}}catch(e){}
-  const init=day.events.map((ev,i)=>Object.assign({id:'ev-'+day.date+'-'+i},ev));
-  localStorage.setItem(key,JSON.stringify(init));
-  DAY_EVENTS[day.date]=init;
-});
-function saveDayEvents(date){localStorage.setItem('bkk2_events_'+date,JSON.stringify(DAY_EVENTS[date]));}
+function loadDayEventsFromStorage(){
+  DAYS.forEach(day=>{
+    const key='bkk2_events_'+day.date;
+    try{const raw=localStorage.getItem(key);if(raw){DAY_EVENTS[day.date]=JSON.parse(raw);return;}}catch(e){}
+    if(DAY_EVENTS[day.date]) return; // already have defaults from a previous call
+    const init=day.events.map((ev,i)=>Object.assign({id:'ev-'+day.date+'-'+i},ev));
+    localStorage.setItem(key,JSON.stringify(init));
+    DAY_EVENTS[day.date]=init;
+  });
+}
+loadDayEventsFromStorage();
+function saveDayEvents(date){
+  localStorage.setItem('bkk2_events_'+date,JSON.stringify(DAY_EVENTS[date]));
+  cloudPush('bkk2_events_'+date, DAY_EVENTS[date]);
+}
 
 function removeDayEvent(date,id){
   DAY_EVENTS[date]=DAY_EVENTS[date].filter(e=>e.id!==id);
@@ -1489,9 +1586,15 @@ function loadList(key,fb){
   const init=fb.map((text,i)=>({id:key+'-'+i, text, checked:false}));
   localStorage.setItem(key,JSON.stringify(init));return init;
 }
-function saveList(key,list){localStorage.setItem(key,JSON.stringify(list));}
+function saveList(key,list){
+  localStorage.setItem(key,JSON.stringify(list));
+  cloudPush(key, list);
+}
 const STATE={};
-Object.keys(KIND_CFG).forEach(k=>STATE[k]=loadList(KIND_CFG[k].key,KIND_CFG[k].defaults));
+function loadStateFromStorage(){
+  Object.keys(KIND_CFG).forEach(k=>STATE[k]=loadList(KIND_CFG[k].key,KIND_CFG[k].defaults));
+}
+loadStateFromStorage();
 
 function goWishSub(sub){
   currentWishSub=sub;
@@ -1564,7 +1667,10 @@ function getDocData(){
   try{const r=localStorage.getItem('bkk2_docs');if(r)return JSON.parse(r);}catch(e){}
   return {insurance:[],visa:[],custom:[]};
 }
-function saveDocData(d){localStorage.setItem('bkk2_docs',JSON.stringify(d));}
+function saveDocData(d){
+  localStorage.setItem('bkk2_docs',JSON.stringify(d));
+  cloudPush('bkk2_docs', d);
+}
 
 function renderAttachRow(url){
   if(!url) return '';
@@ -1823,8 +1929,14 @@ function flipConvert(){const tw=document.getElementById('twdInput'),th=document.
 function escLed(s){ return (s||'').toString().replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 let LEDGER=[];
-try{ LEDGER=JSON.parse(localStorage.getItem('bkk2_ledger')||'[]'); }catch(e){ LEDGER=[]; }
-function saveLedger(){ localStorage.setItem('bkk2_ledger',JSON.stringify(LEDGER)); }
+function loadLedgerFromStorage(){
+  try{ LEDGER=JSON.parse(localStorage.getItem('bkk2_ledger')||'[]'); }catch(e){ LEDGER=[]; }
+}
+loadLedgerFromStorage();
+function saveLedger(){
+  localStorage.setItem('bkk2_ledger',JSON.stringify(LEDGER));
+  cloudPush('bkk2_ledger', LEDGER);
+}
 
 let ledCurrency='TWD';
 let ledSplit=new Set(['SYW','ZYW','JJ']);
@@ -2018,8 +2130,17 @@ function init(){
   ensureRate().then(()=>{ renderLedger(); });
 }
 
-/* Auto-init on load */
-init();
+/* Bootstrap: pull cloud data (if configured) before first render,
+   then subscribe to live updates from other devices. */
+async function bootstrap(){
+  await cloudPull();
+  loadDayEventsFromStorage();
+  loadStateFromStorage();
+  loadLedgerFromStorage();
+  init();
+  subscribeRealtime();
+}
+bootstrap();
 
 /* PWA */
 if('serviceWorker' in navigator){
