@@ -787,6 +787,10 @@ input,textarea,select{font-family:var(--font-body)}
       <input type="url" id="edit-ev-gmap" placeholder="https://maps.app.goo.gl/…">
     </div>
     <div class="edit-field">
+      <label>地圖座標（若連結無法自動定位，可手動填）</label>
+      <input type="text" id="edit-ev-latlng" placeholder="13.7437,100.4888">
+    </div>
+    <div class="edit-field">
       <label>附件連結</label>
       <input type="url" id="edit-ev-attach" placeholder="訂單/票券/QRcode 等連結（選填）">
     </div>
@@ -1464,9 +1468,9 @@ function addDayEvent(date){
   const g=id=>document.getElementById(id);
   const tt=g('newEvTitle').value.trim();
   if(!tt){g('newEvTitle').focus();return;}
-  const ev={id:'ev-'+date+'-'+Date.now(),t:g('newEvTime').value.trim()||'—',ic:g('newEvIcon').value.trim()||'📌',tt,dd:g('newEvDesc').value.trim(),gmap:g('newEvGmap').value.trim(),attachUrl:g('newEvAttach').value.trim()};
+  const ev={id:'ev-'+date+'-'+Date.now(),t:g('newEvTime').value.trim()||'—',ic:g('newEvIcon').value.trim()||'📌',tt,dd:g('newEvDesc').value.trim(),gmap:g('newEvGmap').value.trim(),latlng:g('newEvLatLng').value.trim(),attachUrl:g('newEvAttach').value.trim()};
   DAY_EVENTS[date].push(ev);saveDayEvents(date);
-  ['newEvTime','newEvIcon','newEvTitle','newEvDesc','newEvGmap','newEvAttach'].forEach(id=>g(id).value='');
+  ['newEvTime','newEvIcon','newEvTitle','newEvDesc','newEvGmap','newEvLatLng','newEvAttach'].forEach(id=>g(id).value='');
   renderDayStage();
   refreshCustomMapMarkers();
 }
@@ -1517,8 +1521,9 @@ function renderDayStage(){
     <input id="newEvTitle" placeholder="行程標題">
     <input id="newEvDesc" placeholder="備註說明（選填）">
     <input id="newEvGmap" type="url" placeholder="Google Maps 連結（選填）">
+    <input id="newEvLatLng" type="text" placeholder="地圖座標（選填，格式：13.7437,100.4888）">
     <input id="newEvAttach" type="url" placeholder="附件連結（選填，訂單/票券/QRcode等）">
-    <div class="add-ev-hint">含座標的完整 Google Maps 連結（網址列含 @緯度,經度）才能自動顯示在「地圖」頁籤上；短網址 maps.app.goo.gl 僅會顯示按鈕，不會加地圖釘。</div>
+    <div class="add-ev-hint">含座標的完整 Google Maps 連結（網址列含 @緯度,經度）才能自動顯示在「地圖」頁籤上；短網址 maps.app.goo.gl 無法自動解析，這時可改填「地圖座標」欄位（在 Google Maps 上長按地點會顯示緯度,經度，複製貼上即可）。</div>
     <button class="add-ev-btn" onclick="addDayEvent('${day.date}')">新增行程</button>
   </div>`;
 
@@ -1560,6 +1565,7 @@ function openEditModal(date, id){
   });
   g('edit-ev-dd').value   = tempDiv.innerHTML.replace(/<br\s*\/?>/gi,'\n').replace(/<[^>]+>/g,'').trim();
   g('edit-ev-gmap').value = ev.gmap || '';
+  g('edit-ev-latlng').value = ev.latlng || '';
   g('edit-ev-attach').value = ev.attachUrl || '';
   document.getElementById('edit-modal').classList.add('open');
   setTimeout(()=>g('edit-ev-tt').focus(),120);
@@ -1581,6 +1587,7 @@ function saveEditEvent(){
     tt,
     dd:   g('edit-ev-dd').value.trim().replace(/\n/g,'<br>'),
     gmap: g('edit-ev-gmap').value.trim(),
+    latlng: g('edit-ev-latlng').value.trim(),
     attachUrl: g('edit-ev-attach').value.trim(),
   };
   const events=DAY_EVENTS[date]||[];
@@ -1862,13 +1869,20 @@ function extractLatLngFromUrl(url){
   if(m) return {lat:+m[1], lng:+m[2]};
   return null;
 }
+function parseManualLatLng(s){
+  if(!s) return null;
+  const m = s.trim().match(/^(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)$/);
+  if(!m) return null;
+  return {lat:+m[1], lng:+m[2]};
+}
 function getCustomMapPoints(){
   const pts=[];
   DAYS.forEach(day=>{
     (DAY_EVENTS[day.date]||[]).forEach(ev=>{
-      if(!ev.gmap) return;
-      const c=extractLatLngFromUrl(ev.gmap);
-      if(c) pts.push({name:ev.tt, note:day.title+'　'+(ev.t||''), lat:c.lat, lng:c.lng, url:ev.gmap});
+      const manual = parseManualLatLng(ev.latlng);
+      const c = manual || extractLatLngFromUrl(ev.gmap);
+      if(!c) return;
+      pts.push({name:ev.tt, note:day.title+'　'+(ev.t||''), lat:c.lat, lng:c.lng, url:ev.gmap||''});
     });
   });
   return pts;
@@ -1877,8 +1891,9 @@ function refreshCustomMapMarkers(){
   if(!customLayerGroup) return;
   customLayerGroup.clearLayers();
   getCustomMapPoints().forEach(p=>{
+    const gm = p.url || ('https://www.google.com/maps/dir/?api=1&destination='+p.lat+','+p.lng);
     const icon=L.divIcon({html:'<div style="font-size:22px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))">📍</div>',className:'',iconSize:[26,26],iconAnchor:[13,13]});
-    L.marker([p.lat,p.lng],{icon}).bindPopup(`<b style="font-size:.9rem">${p.name}</b><br><span style="font-size:.78rem;color:#666">${p.note}</span><br><a style="display:inline-block;margin-top:6px;padding:5px 11px;background:#405463;color:#fff;border-radius:7px;font-size:.73rem;font-weight:600;text-decoration:none" href="${p.url}" target="_blank" rel="noopener">Google Maps →</a>`).addTo(customLayerGroup);
+    L.marker([p.lat,p.lng],{icon}).bindPopup(`<b style="font-size:.9rem">${p.name}</b><br><span style="font-size:.78rem;color:#666">${p.note}</span><br><a style="display:inline-block;margin-top:6px;padding:5px 11px;background:#405463;color:#fff;border-radius:7px;font-size:.73rem;font-weight:600;text-decoration:none" href="${gm}" target="_blank" rel="noopener">Google Maps →</a>`).addTo(customLayerGroup);
   });
 }
 function initMap(){
