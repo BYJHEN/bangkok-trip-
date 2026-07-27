@@ -229,6 +229,8 @@ input,textarea,select{font-family:var(--font-body)}
   background:var(--card);border:1px solid var(--div);border-radius:var(--r-sm);
   padding:14px 16px;box-shadow:var(--shadow-sm);
 }
+.q-card-tap{cursor:pointer;transition:transform .12s ease, box-shadow .12s ease;}
+.q-card-tap:active{transform:scale(.97);}
 .q-label{
   font-size:.68rem;font-weight:600;color:var(--accent-a);
   letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;
@@ -350,6 +352,7 @@ input,textarea,select{font-family:var(--font-body)}
 }
 .add-ev-h{font-size:.78rem;font-weight:700;color:var(--text3);margin-bottom:2px;letter-spacing:.04em}
 .add-ev-row{display:flex;gap:8px}
+.add-ev-hint{font-size:.68rem;color:var(--text3);line-height:1.5;margin-top:-4px;}
 .add-ev input,.add-ev textarea{
   border:1.5px solid var(--div);background:var(--bg);border-radius:var(--r-xs);
   padding:10px 12px;font-size:.85rem;color:var(--text);width:100%;outline:none;
@@ -425,36 +428,47 @@ input,textarea,select{font-family:var(--font-body)}
 .tip-card:last-child{border-bottom:none}
 .tip-ic{font-size:1.3rem;flex-shrink:0;margin-top:1px}
 .tip-h{font-weight:600;font-size:.9rem;margin-bottom:4px;color:var(--text)}
+.tip-subhead{font-size:.78rem;font-weight:700;color:var(--primary);margin:10px 0 4px;letter-spacing:.02em;}
+.tip-subhead:first-of-type{margin-top:6px;}
+.tip-list{margin:0 0 4px;padding-left:18px;}
+.tip-list li{font-size:.85rem;color:var(--text2);line-height:1.55;margin-bottom:4px;}
+.tip-link{color:var(--primary);text-decoration:underline;font-weight:600;}
+.tip-note{font-size:.76rem;color:var(--text3);margin-top:6px;line-height:1.5;}
 .tip-t{font-size:.82rem;color:var(--text2);line-height:1.6}
 
-/* ── CURRENCY ── */
-.rate-hero{
-  background:var(--primary);border-radius:var(--r);
-  padding:24px 20px;text-align:center;margin-bottom:18px;
+/* ── CURRENCY (compact, combined row) ── */
+.fx-combo{display:flex;gap:10px;align-items:stretch;margin-bottom:12px;flex-wrap:wrap;}
+.fx-rate-box{
+  flex:1 1 110px;min-width:100px;background:var(--primary);border-radius:var(--r-sm);
+  padding:12px 10px;text-align:center;color:#fff;display:flex;flex-direction:column;justify-content:center;
 }
-.rate-big{font-family:var(--font-num);font-size:2.6rem;font-weight:700;color:#fff}
-.rate-lbl{font-size:.75rem;color:rgba(255,255,255,.5);margin-top:4px;letter-spacing:.04em}
-.rate-upd{font-size:.68rem;color:rgba(255,255,255,.3);margin-top:6px}
-.conv-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.conv-row input{
-  flex:1;border:1.5px solid var(--div);border-radius:var(--r-xs);
-  padding:12px 14px;font-size:1.05rem;background:var(--card);color:var(--text);
-  outline:none;font-family:var(--font-num);transition:border-color .2s;
+.fx-rate-value{font-family:var(--font-num);font-size:1.25rem;font-weight:700;line-height:1.2;}
+.fx-rate-lbl{font-size:.6rem;color:rgba(255,255,255,.55);margin-top:3px;letter-spacing:.03em;}
+.fx-rate-upd{font-size:.56rem;color:rgba(255,255,255,.35);margin-top:3px;}
+.fx-convert-box{
+  flex:2 1 190px;min-width:180px;background:var(--card);border:1px solid var(--div);
+  border-radius:var(--r-sm);padding:9px 10px;display:flex;align-items:center;gap:8px;
 }
-.conv-row input:focus{border-color:var(--primary)}
-.conv-row .cur{font-size:.82rem;font-weight:700;color:var(--text3);width:44px}
-.swap-btn{
-  display:block;margin:2px auto 12px;border:1.5px solid var(--div);
-  background:var(--card);border-radius:999px;width:36px;height:36px;
-  font-size:1rem;color:var(--primary);
+.fx-convert-col{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0;}
+.fx-convert-row{display:flex;align-items:center;gap:6px;}
+.fx-convert-row .cur{font-size:.66rem;font-weight:700;color:var(--text3);width:28px;flex-shrink:0;}
+.fx-convert-row input{
+  flex:1;min-width:0;border:1.5px solid var(--div);border-radius:8px;padding:6px 8px;
+  font-size:.82rem;background:var(--bg);color:var(--text);outline:none;
+  font-family:var(--font-num);transition:border-color .2s;
 }
-.rate-table-row{
-  display:flex;justify-content:space-between;
-  padding:9px 0;border-bottom:1px solid var(--div);font-size:.85rem;
+.fx-convert-row input:focus{border-color:var(--primary);}
+.swap-btn-sm{
+  flex-shrink:0;border:1.5px solid var(--div);background:var(--card);border-radius:999px;
+  width:26px;height:26px;font-size:.76rem;color:var(--primary);
 }
-.rate-table-row:last-child{border-bottom:none}
-.rate-table-row .r-twd{color:var(--text2);font-weight:500}
-.rate-table-row .r-thb{font-family:var(--font-num);font-weight:700;color:var(--primary)}
+.rate-table-compact{display:grid;grid-template-columns:1fr 1fr;gap:2px 14px;}
+.rate-table-row-sm{
+  display:flex;justify-content:space-between;gap:6px;
+  padding:5px 0;border-bottom:1px dashed var(--div);font-size:.72rem;
+}
+.rate-table-row-sm .r-twd{color:var(--text2);}
+.rate-table-row-sm .r-thb{font-family:var(--font-num);font-weight:700;color:var(--primary);}
 
 /* ── WEATHER ── */
 .wx-hero{
@@ -540,6 +554,56 @@ input,textarea,select{font-family:var(--font-body)}
 .doc-file-item .df-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .doc-file-rm{border:none;background:none;color:var(--text3);font-size:.82rem;padding:2px 4px;opacity:.5}
 .doc-file-rm:hover{opacity:1;color:var(--danger)}
+.doc-card-footer{display:flex;justify-content:flex-end;margin-top:12px;padding-top:12px;border-top:1px solid var(--div)}
+.doc-card-save{
+  border:none;background:var(--primary);color:#fff;border-radius:999px;
+  padding:8px 18px;font-size:.8rem;font-weight:700;cursor:pointer;
+}
+.doc-card-save:active{transform:scale(.96)}
+.app-toast{
+  position:fixed;left:50%;bottom:86px;transform:translateX(-50%) translateY(16px);
+  background:var(--primary-d);color:#fff;padding:10px 20px;border-radius:999px;
+  font-size:.82rem;font-weight:600;opacity:0;pointer-events:none;
+  transition:opacity .25s ease, transform .25s ease;z-index:300;box-shadow:var(--shadow);
+  white-space:nowrap;
+}
+.app-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ledger */
+.ledger-add-card{margin-bottom:16px;}
+.ledger-add-h{font-family:var(--font-head);font-size:1rem;font-weight:600;color:var(--text);margin-bottom:12px;}
+.ledger-amount-row{display:flex;gap:8px;}
+.ledger-amount-row input{flex:1;}
+.cur-toggle{display:flex;border:1.5px solid var(--div);border-radius:var(--r-xs);overflow:hidden;flex-shrink:0;}
+.cur-opt{border:none;background:var(--bg);color:var(--text3);padding:0 14px;font-size:.8rem;font-weight:700;cursor:pointer;}
+.cur-opt.active{background:var(--primary);color:#fff;}
+.ledger-fx-hint{font-size:.76rem;color:var(--text3);margin-top:6px;min-height:1em;}
+.split-chips{display:flex;gap:8px;flex-wrap:wrap;}
+.split-chip{
+  border:1.5px solid var(--div);background:var(--bg);color:var(--text3);
+  border-radius:999px;padding:7px 16px;font-size:.8rem;font-weight:700;cursor:pointer;
+}
+.split-chip.active{background:var(--secondary);border-color:var(--secondary);color:#fff;}
+.ledger-total-row{display:flex;gap:12px;}
+.ledger-total-row>div{flex:1;background:var(--bg2);border-radius:var(--r-xs);padding:12px;text-align:center;}
+.ledger-total-label{font-size:.68rem;color:var(--text3);font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+.ledger-total-value{font-family:var(--font-num);font-size:1.15rem;font-weight:700;color:var(--primary);margin-top:2px;}
+.ledger-per-person{display:flex;gap:8px;margin-top:12px;}
+.ledger-person{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+  background:var(--bg);border:1px solid var(--div);border-radius:var(--r-xs);padding:9px 4px;font-size:.78rem;color:var(--text2);
+}
+.ledger-person b{font-family:var(--font-num);color:var(--text);font-size:.9rem;}
+.ledger-person b.ledger-person-thb{color:var(--accent-a);font-size:.8rem;}
+.ledger-item{
+  background:var(--card);border:1px solid var(--div);border-radius:var(--r-sm);
+  padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow-sm);
+}
+.ledger-item-h{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;font-size:.88rem;}
+.ledger-item-date{color:var(--text3);font-size:.76rem;margin-right:6px;}
+.ledger-item-amt{font-family:var(--font-num);font-size:1.02rem;font-weight:700;color:var(--primary);margin-top:6px;}
+.ledger-item-fx{font-family:var(--font-num);font-size:.76rem;color:var(--text3);font-weight:400;margin-left:6px;}
+.ledger-item-meta{font-size:.76rem;color:var(--text3);margin-top:4px;}
 .doc-add-form{
   background:var(--bg2);border-radius:var(--r-sm);padding:16px;
   margin-bottom:10px;border:1px solid var(--div);
@@ -595,6 +659,39 @@ input,textarea,select{font-family:var(--font-body)}
   font-weight:700;letter-spacing:.02em;
 }
 .ev-edit:hover{opacity:1}
+
+/* ── FLIGHT DETAIL MODAL ── */
+#flight-modal{
+  position:fixed;inset:0;z-index:500;
+  background:rgba(30,40,50,.55);backdrop-filter:blur(8px);
+  display:none;align-items:flex-end;justify-content:center;
+}
+#flight-modal.open{display:flex}
+.flight-sheet{
+  position:relative;background:var(--card);border-radius:28px 28px 0 0;
+  padding:16px 24px 40px;width:100%;max-width:540px;
+  box-shadow:0 -4px 40px rgba(0,0,0,.15);text-align:center;
+}
+.flight-close{
+  position:absolute;right:18px;top:14px;border:none;background:var(--bg2);
+  color:var(--text3);width:30px;height:30px;border-radius:50%;font-size:.85rem;
+}
+.flight-route-art{margin:6px 0 4px;}
+.flight-airline{font-family:var(--font-head);font-size:1.05rem;font-weight:600;color:var(--text);margin-top:4px;}
+.flight-number{font-size:.85rem;color:var(--text3);letter-spacing:.06em;margin-bottom:18px;}
+.flight-route-row{display:flex;align-items:center;justify-content:center;gap:18px;margin-bottom:18px;}
+.flight-endpoint{text-align:center;}
+.flight-city{font-size:.78rem;color:var(--text3);}
+.flight-code{font-size:1.5rem;font-weight:700;color:var(--primary);}
+.flight-arrow{color:var(--secondary);font-size:1.1rem;}
+.flight-field{
+  display:flex;justify-content:space-between;padding:10px 2px;
+  border-bottom:1px solid var(--div);font-size:.86rem;text-align:left;
+}
+.flight-field:last-of-type{border-bottom:none;}
+.flight-field span{color:var(--text3);}
+.flight-field b{color:var(--text);font-family:var(--font-num);font-weight:600;}
+.flight-disclaimer{font-size:.7rem;color:var(--text3);margin-top:14px;text-align:left;line-height:1.5;}
 
 /* ── LOADING / ERROR ── */
 .loading{text-align:center;padding:36px 20px;color:var(--text3);font-size:.85rem}
@@ -661,6 +758,46 @@ input,textarea,select{font-family:var(--font-body)}
   </div>
 </div>
 
+<!-- ═══════════════════════════ FLIGHT DETAIL MODAL ═══════════════════════════ -->
+<div id="flight-modal">
+  <div class="flight-sheet">
+    <button class="flight-close" onclick="closeFlightModal()">✕</button>
+    <div class="flight-route-art">
+      <svg viewBox="0 0 320 120" width="100%" height="120" aria-hidden="true">
+        <line x1="34" y1="90" x2="286" y2="30" stroke="var(--secondary)" stroke-width="1.5" stroke-dasharray="4 5"/>
+        <circle cx="34" cy="90" r="5" fill="var(--accent-a)"/>
+        <circle cx="286" cy="30" r="5" fill="var(--primary)"/>
+        <g id="flight-plane-icon" transform="translate(160,60) rotate(-16)">
+          <text x="0" y="0" font-size="20" text-anchor="middle" dominant-baseline="middle">✈️</text>
+        </g>
+        <text x="34" y="108" font-family="Inter,sans-serif" font-size="12" font-weight="700" fill="var(--text2)" text-anchor="middle">BKK</text>
+        <text x="286" y="18" font-family="Inter,sans-serif" font-size="12" font-weight="700" fill="var(--text2)" text-anchor="middle">TPE</text>
+      </svg>
+    </div>
+    <div class="flight-airline" id="flight-airline">China Airlines</div>
+    <div class="flight-number num" id="flight-number">CI831</div>
+
+    <div class="flight-route-row">
+      <div class="flight-endpoint">
+        <div class="flight-city" id="flight-from-city">Taipei 臺北</div>
+        <div class="flight-code num" id="flight-from-code2">TPE</div>
+      </div>
+      <div class="flight-arrow">✈</div>
+      <div class="flight-endpoint">
+        <div class="flight-city" id="flight-to-city">Bangkok 曼谷</div>
+        <div class="flight-code num" id="flight-to-code2">BKK</div>
+      </div>
+    </div>
+
+    <div class="flight-field"><span>航廈</span><b id="flight-terminal">—</b></div>
+    <div class="flight-field"><span>預定起飛</span><b id="flight-dep">—</b></div>
+    <div class="flight-field"><span>預定抵達</span><b id="flight-arr">—</b></div>
+    <div class="flight-field"><span>飛行時間</span><b id="flight-dur">—</b></div>
+
+    <div class="flight-disclaimer">＊以訂票資料排定時間為準，非即時航班動態；實際登機門與起降時間請以機場現場公告為準。</div>
+  </div>
+</div>
+
 <!-- ═══════════════════════════ APP ═══════════════════════════ -->
 <div id="app" class="visible">
 
@@ -675,12 +812,12 @@ input,textarea,select{font-family:var(--font-body)}
       <button class="tab-btn" data-tab="home"      onclick="go('home')"><span class="tab-icon">🏠</span>首頁</button>
       <button class="tab-btn" data-tab="itinerary" onclick="go('itinerary')"><span class="tab-icon">🗓️</span>行程</button>
       <button class="tab-btn" data-tab="map"       onclick="go('map')"><span class="tab-icon">🗺️</span>地圖</button>
-      <button class="tab-btn" data-tab="packing"   onclick="go('packing')"><span class="tab-icon">🧳</span>行李</button>
+      <button class="tab-btn" data-tab="ledger"    onclick="go('ledger')"><span class="tab-icon">💰</span>記帳</button>
       <button class="tab-btn" data-tab="wishlist"  onclick="go('wishlist')"><span class="tab-icon">🛍️</span>願望</button>
-      <button class="tab-btn" data-tab="docs"      onclick="go('docs')"><span class="tab-icon">📂</span>文件</button>
-      <button class="tab-btn" data-tab="tips"      onclick="go('tips')"><span class="tab-icon">💡</span>提醒</button>
-      <button class="tab-btn" data-tab="currency"  onclick="go('currency')"><span class="tab-icon">💱</span>匯率</button>
       <button class="tab-btn" data-tab="weather"   onclick="go('weather')"><span class="tab-icon">☀️</span>天氣</button>
+      <button class="tab-btn" data-tab="tips"      onclick="go('tips')"><span class="tab-icon">💡</span>提醒</button>
+      <button class="tab-btn" data-tab="packing"   onclick="go('packing')"><span class="tab-icon">🧳</span>行李</button>
+      <button class="tab-btn" data-tab="docs"      onclick="go('docs')"><span class="tab-icon">📂</span>文件</button>
     </div>
   </div>
 
@@ -709,15 +846,15 @@ input,textarea,select{font-family:var(--font-body)}
         <div class="q-note">BTS Asok · 2 間房</div>
         <a class="gmap-btn" target="_blank" rel="noopener" href="https://maps.app.goo.gl/VSShUUuVQW7cWVbB9">Google Maps →</a>
       </div>
-      <div class="q-card">
+      <div class="q-card q-card-tap" onclick="openFlightModal('CI831')">
         <div class="q-label">去程航班</div>
         <div class="q-val">CI831 · 10:05–13:05</div>
-        <div class="q-note">桃園 TPE → 曼谷 BKK</div>
+        <div class="q-note">桃園 TPE → 曼谷 BKK ・ 點我看航班圖卡</div>
       </div>
-      <div class="q-card">
+      <div class="q-card q-card-tap" onclick="openFlightModal('CI832')">
         <div class="q-label">回程航班</div>
         <div class="q-val">CI832 · 14:05–18:40</div>
-        <div class="q-note">曼谷 BKK → 桃園 TPE</div>
+        <div class="q-note">曼谷 BKK → 桃園 TPE ・ 點我看航班圖卡</div>
       </div>
       <div class="q-card">
         <div class="q-label">提醒</div>
@@ -749,9 +886,65 @@ input,textarea,select{font-family:var(--font-body)}
     <div id="leaflet-map"></div>
     <div class="map-legend">
       <span>🏨 飯店</span><span>✈️ 交通</span><span>🍴 餐飲</span>
-      <span>🛍️ 市集</span><span>🏛️ 景點</span><span>💆 按摩</span>
+      <span>🛍️ 市集</span><span>🏛️ 景點</span><span>💆 按摩</span><span>📍 我新增的行程</span>
     </div>
-    <div class="card" style="font-size:.82rem;color:var(--text2)">點擊地圖圖示查看詳細資訊，再點「Google Maps 導航」開啟路線。右上角可切換圖層分類。</div>
+    <div class="card" style="font-size:.82rem;color:var(--text2)">點擊地圖圖示查看詳細資訊，再點「Google Maps 導航」開啟路線。右上角可切換圖層分類。在「行程」頁籤新增行程時填入含座標的 Google Maps 連結，會自動出現在這裡的「📍 我新增的行程」圖層。</div>
+  </section>
+
+  <!-- ═══════ LEDGER ═══════ -->
+  <section id="view-ledger" class="view">
+    <div class="page-head"><h2>記帳</h2><div class="sub">共同旅費，一目了然</div></div>
+
+    <div class="card" id="ledgerSummary"></div>
+
+    <div class="section-label" style="margin:18px 4px 8px;">即時匯率</div>
+    <div class="fx-combo">
+      <div class="fx-rate-box">
+        <div class="fx-rate-value" id="rateBig">— THB</div>
+        <div class="fx-rate-lbl">1 TWD 參考匯率</div>
+        <div class="fx-rate-upd" id="rateUpdated"></div>
+      </div>
+      <div class="fx-convert-box">
+        <div class="fx-convert-col">
+          <div class="fx-convert-row"><span class="cur">TWD</span><input type="text" id="twdInput" inputmode="decimal" value="1000"></div>
+          <div class="fx-convert-row"><span class="cur">THB</span><input type="text" id="thbInput" inputmode="decimal" value="0"></div>
+        </div>
+        <button class="swap-btn-sm" onclick="flipConvert()">⇅</button>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px;padding:12px 14px;">
+      <div class="section-label" style="margin-bottom:8px;">常用金額對照</div>
+      <div class="rate-table-compact" id="rateTable"></div>
+    </div>
+
+    <div class="ledger-add-card">
+      <div class="ledger-add-h">＋ 新增一筆記帳</div>
+      <div class="doc-field"><label>日期</label><input type="date" id="ledDate"></div>
+      <div class="doc-field"><label>品項</label><input type="text" id="ledItem" placeholder="例如：晚餐、按摩、購物"></div>
+      <div class="doc-field">
+        <label>金額</label>
+        <div class="ledger-amount-row">
+          <input type="text" inputmode="decimal" id="ledAmount" placeholder="0">
+          <div class="cur-toggle" id="ledCurToggle">
+            <button type="button" class="cur-opt active" data-cur="TWD" onclick="setLedCur('TWD')">TWD</button>
+            <button type="button" class="cur-opt" data-cur="THB" onclick="setLedCur('THB')">THB</button>
+          </div>
+        </div>
+        <div class="ledger-fx-hint" id="ledFxHint"></div>
+      </div>
+      <div class="doc-field">
+        <label>分攤對象</label>
+        <div class="split-chips" id="ledSplitChips">
+          <button type="button" class="split-chip active" data-m="SYW" onclick="toggleSplit('SYW')">SYW</button>
+          <button type="button" class="split-chip active" data-m="ZYW" onclick="toggleSplit('ZYW')">ZYW</button>
+          <button type="button" class="split-chip active" data-m="JJ" onclick="toggleSplit('JJ')">JJ</button>
+        </div>
+      </div>
+      <div class="doc-field"><label>備註</label><input type="text" id="ledNote" placeholder="選填"></div>
+      <button class="doc-card-save" style="width:100%;" onclick="addLedgerEntry()">＋ 新增記錄</button>
+    </div>
+
+    <div id="ledgerList"></div>
   </section>
 
   <!-- ═══════ PACKING ═══════ -->
@@ -841,33 +1034,60 @@ input,textarea,select{font-family:var(--font-body)}
       </div>
       <div class="tip-card">
         <div class="tip-ic">🛂</div>
-        <div><div class="tip-h">入境</div><div class="tip-t">台灣護照目前入境泰國免簽，可停留 30 天，出發前確認護照效期至少 6 個月以上。</div></div>
-      </div>
-    </div>
-  </section>
+        <div style="flex:1;">
+          <div class="tip-h">入境</div>
+          <div class="tip-t">台灣護照目前入境泰國免簽，可停留 30 天，出發前確認護照效期至少 6 個月以上。</div>
 
-  <!-- ═══════ CURRENCY ═══════ -->
-  <section id="view-currency" class="view">
-    <div class="page-head"><h2>匯率換算</h2><div class="sub">TWD ⇄ THB · 即時抓取</div></div>
-    <div class="rate-hero">
-      <div class="rate-big" id="rateBig">— THB</div>
-      <div class="rate-lbl">1 新台幣（TWD）參考匯率</div>
-      <div class="rate-upd" id="rateUpdated"></div>
-    </div>
-    <div class="card" style="margin-bottom:14px">
-      <div class="conv-row">
-        <div class="cur">TWD</div>
-        <input type="text" id="twdInput" inputmode="decimal" value="1000">
+          <div class="tip-subhead">電子入境卡</div>
+          <ul class="tip-list">
+            <li>出發前 72 小時內須至<a class="tip-link" href="https://tdac.immigration.go.th/" target="_blank" rel="noopener">泰國電子入境卡官網 →</a>填寫，並取得<a class="tip-link" href="https://blog.eztravel.com.tw/thailand-entry-guide/" target="_blank" rel="noopener">TDAC →</a>系統確認之 QR Code</li>
+            <li>亦可下載試行中的<a class="tip-link" href="https://bkk.com.tw/thailand-immigration-management-system/" target="_blank" rel="noopener">THIM App →</a>進行綁定申報</li>
+          </ul>
+
+          <div class="tip-subhead">入境觀光費</div>
+          <ul class="tip-list">
+            <li>目前空運入境費為 300 泰銖，陸路或海路入境則為 150 泰銖</li>
+            <li>此費用部分將用於支付旅客在泰國期間的基礎意外醫療保險，多數情況下會直接整合至機票票價中，不需額外支付現金</li>
+          </ul>
+
+          <div class="tip-subhead">海關與現金抽查限制</div>
+          <ul class="tip-list">
+            <li><b>現金準備</b>：海關有權隨機抽查，個人須備妥至少 20,000 泰銖（家庭 40,000 泰銖）或等值外幣之實體現鈔，電子支付與刷卡證明不算數</li>
+            <li><b>菸酒限量</b>：每人僅限攜帶酒類 1 公升、香菸 200 支（一條），且同行者之菸酒不得由一人集中攜帶</li>
+            <li><b>嚴禁違禁品</b>：泰國全面嚴格禁止攜帶、持有或使用電子菸與加熱菸，違者最高可判處 5 年監禁</li>
+          </ul>
+          <div class="tip-note">
+            資料來源：
+            <a class="tip-link" href="https://www.boca.gov.tw/sp-foof-countrycp-01-24-dec45-1.html" target="_blank" rel="noopener">外交部領事事務局</a>・
+            <a class="tip-link" href="https://blog.eztravel.com.tw/thailand-entry-guide/" target="_blank" rel="noopener">易遊網部落格</a>・
+            <a class="tip-link" href="https://tw.news.yahoo.com/%E6%B3%B0%E5%9C%8B%E6%96%B0%E5%88%B6%E7%82%B8%E9%8D%8B-%E5%85%8D%E7%B0%BD%E7%B8%AE%E7%9F%AD-%E7%8F%BE%E9%87%91%E5%B8%B6%E4%B8%8D%E5%A4%A0%E9%81%A3%E8%BF%94-100347070.html" target="_blank" rel="noopener">Yahoo新聞</a>
+            ・規定可能隨時異動，出發前請以官方公告為準
+          </div>
+        </div>
       </div>
-      <button class="swap-btn" onclick="flipConvert()">⇅</button>
-      <div class="conv-row">
-        <div class="cur">THB</div>
-        <input type="text" id="thbInput" inputmode="decimal" value="0">
+      <div class="tip-card">
+        <div class="tip-ic">🧳</div>
+        <div style="flex:1;">
+          <div class="tip-h">行李規範</div>
+          <div class="tip-t">本頁面為華航規範。</div>
+
+          <div class="tip-subhead">託運行李</div>
+          <ul class="tip-list">
+            <li>每件行李尺寸需符合長＋寬＋高總和 158 公分（含）以內</li>
+            <li>1 件 23 公斤（50 磅）／件</li>
+            <li>安裝有鋰電池之電子裝置託運，請詳閱<a class="tip-link" href="https://www.china-airlines.com/tw/zh/prepare-for-the-fly/information/baggage/dangerous-goods" target="_blank" rel="noopener">危險品須知 →</a></li>
+          </ul>
+
+          <div class="tip-subhead">隨身行李</div>
+          <ul class="tip-list">
+            <li>手提行李（限 1 件），尺寸包括輪子、把手及側袋，長 × 寬 × 高不可超過 56 × 36 × 23 公分（22 × 14 × 9 英吋），單件重量不可超過 7 公斤（15 磅）</li>
+            <li>個人物品（限 1 件），尺寸包括輪子、把手及側袋，長 × 高 × 寬不可超過 40 × 30 × 15 公分（16 × 12 × 6 英吋）為原則，或長寬高總和不得超過 85 公分（34 英吋）；若超過前述尺寸，應納入手提行李額度計算</li>
+          </ul>
+          <div class="tip-note">
+            個人物品範例：小型背包、小型手提袋皮包・手提電腦、手提公事包・適量免稅品・相機背袋、輕型相機、望遠鏡・傘具・大衣、少量個人食物與飲料及其他身上之小型物品
+          </div>
+        </div>
       </div>
-    </div>
-    <div class="card">
-      <div class="section-label">常用金額對照</div>
-      <div id="rateTable"></div>
     </div>
   </section>
 
@@ -921,6 +1141,51 @@ const TRIP = {
   depart: new Date('2027-01-23T10:05:00+07:00'),
   arriveHome: new Date('2027-01-27T18:40:00+07:00'),
 };
+
+const FLIGHTS = {
+  CI831:{
+    airline:'中華航空 China Airlines', number:'CI831',
+    from:{code:'TPE',city:'Taipei 臺北'}, to:{code:'BKK',city:'Bangkok 曼谷'},
+    dep:'2027-01-23T10:05:00+08:00', arr:'2027-01-23T13:05:00+07:00',
+    terminal:'桃園機場 第一航廈 → 蘇凡納布機場'
+  },
+  CI832:{
+    airline:'中華航空 China Airlines', number:'CI832',
+    from:{code:'BKK',city:'Bangkok 曼谷'}, to:{code:'TPE',city:'Taipei 臺北'},
+    dep:'2027-01-27T14:05:00+07:00', arr:'2027-01-27T18:40:00+08:00',
+    terminal:'蘇凡納布機場 → 桃園機場 第一航廈'
+  }
+};
+
+function fmtFlightDateTime(iso){
+  const d = new Date(iso);
+  const wd = ['週日','週一','週二','週三','週四','週五','週六'][d.getDay()];
+  const hh = String(d.getHours()).padStart(2,'0');
+  const mm = String(d.getMinutes()).padStart(2,'0');
+  return (d.getMonth()+1)+'月'+d.getDate()+'日 '+wd+'　'+hh+':'+mm;
+}
+function openFlightModal(code){
+  const f = FLIGHTS[code];
+  if(!f) return;
+  document.getElementById('flight-airline').textContent = f.airline;
+  document.getElementById('flight-number').textContent = f.number;
+  document.getElementById('flight-from-city').textContent = f.from.city;
+  document.getElementById('flight-to-city').textContent = f.to.city;
+  document.getElementById('flight-from-code2').textContent = f.from.code;
+  document.getElementById('flight-to-code2').textContent = f.to.code;
+  document.getElementById('flight-terminal').textContent = f.terminal;
+  document.getElementById('flight-dep').textContent = fmtFlightDateTime(f.dep);
+  document.getElementById('flight-arr').textContent = fmtFlightDateTime(f.arr);
+  const mins = Math.round((new Date(f.arr) - new Date(f.dep))/60000);
+  document.getElementById('flight-dur').textContent = Math.floor(mins/60)+' 小時 '+(mins%60)+' 分鐘';
+  const art = document.getElementById('flight-plane-icon');
+  // BKK sits bottom-left, TPE sits top-right on the route art (fixed geography).
+  // Point the plane toward whichever city is the destination.
+  if(art) art.setAttribute('transform', f.to.code==='BKK' ? 'translate(160,60) rotate(164)' : 'translate(160,60) rotate(-16)');
+  document.getElementById('flight-modal').classList.add('open');
+}
+function closeFlightModal(){ document.getElementById('flight-modal').classList.remove('open'); }
+document.getElementById('flight-modal').addEventListener('click', e=>{ if(e.target.id==='flight-modal') closeFlightModal(); });
 
 const DAYS = [
   { date:'2027-01-23', wd:'Sat', title:'Day 1 · 抵達曼谷', theme:'🛬 抵達曼谷 · 開啟旅程', band:'jade',
@@ -996,10 +1261,10 @@ function _goView(name){
   document.getElementById('view-'+name).classList.add('active');
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
   window.scrollTo({top:0,behavior:'smooth'});
-  if(name==='map') setTimeout(initMap,30);
-  if(name==='currency') initCurrency();
+  if(name==='map'){ setTimeout(initMap,30); setTimeout(refreshCustomMapMarkers,60); }
   if(name==='weather') initWeather();
   if(name==='docs') renderDocs();
+  if(name==='ledger'){ renderLedger(); initCurrency(); ensureRate().then(renderLedger); }
 }
 function go(name){
   if(name==='docs'){
@@ -1070,15 +1335,17 @@ function saveDayEvents(date){localStorage.setItem('bkk2_events_'+date,JSON.strin
 function removeDayEvent(date,id){
   DAY_EVENTS[date]=DAY_EVENTS[date].filter(e=>e.id!==id);
   saveDayEvents(date);renderDayStage();
+  refreshCustomMapMarkers();
 }
 function addDayEvent(date){
   const g=id=>document.getElementById(id);
   const tt=g('newEvTitle').value.trim();
   if(!tt){g('newEvTitle').focus();return;}
-  const ev={id:'ev-'+date+'-'+Date.now(),t:g('newEvTime').value.trim()||'—',ic:g('newEvIcon').value.trim()||'📌',tt,dd:g('newEvDesc').value.trim()};
+  const ev={id:'ev-'+date+'-'+Date.now(),t:g('newEvTime').value.trim()||'—',ic:g('newEvIcon').value.trim()||'📌',tt,dd:g('newEvDesc').value.trim(),gmap:g('newEvGmap').value.trim()};
   DAY_EVENTS[date].push(ev);saveDayEvents(date);
-  ['newEvTime','newEvIcon','newEvTitle','newEvDesc'].forEach(id=>g(id).value='');
+  ['newEvTime','newEvIcon','newEvTitle','newEvDesc','newEvGmap'].forEach(id=>g(id).value='');
   renderDayStage();
+  refreshCustomMapMarkers();
 }
 function renderDayDots(){
   const t=todayStr();
@@ -1124,6 +1391,8 @@ function renderDayStage(){
     </div>
     <input id="newEvTitle" placeholder="行程標題">
     <input id="newEvDesc" placeholder="備註說明（選填）">
+    <input id="newEvGmap" type="url" placeholder="Google Maps 連結（選填）">
+    <div class="add-ev-hint">含座標的完整 Google Maps 連結（網址列含 @緯度,經度）才能自動顯示在「地圖」頁籤上；短網址 maps.app.goo.gl 僅會顯示按鈕，不會加地圖釘。</div>
     <button class="add-ev-btn" onclick="pwdGate('addDayEvent','${day.date}')">新增行程</button>
   </div>`;
 
@@ -1196,6 +1465,7 @@ function saveEditEvent(){
     saveDayEvents(date);
     closeEditModal();
     renderDayStage();
+    refreshCustomMapMarkers();
   };
   document.getElementById('pwd-modal-title').textContent='🔒 儲存行程';
   document.getElementById('pwd-modal-desc').textContent='請輸入密碼以儲存變更';
@@ -1307,14 +1577,14 @@ function renderDocEntry(type,entry,idx){
   const fieldsHtml=schema.fields.map(f=>{
     const val=(entry[f.id]||'').replace(/"/g,'&quot;');
     if(f.type==='textarea'){
-      return `<div class="doc-field"><label>${f.label}</label><textarea rows="2" onchange="updateDocField('${type}',${idx},'${f.id}',this.value)" placeholder="${f.placeholder}">${entry[f.id]||''}</textarea></div>`;
+      return `<div class="doc-field"><label>${f.label}</label><textarea rows="2" data-field="${f.id}" onchange="updateDocField('${type}',${idx},'${f.id}',this.value)" placeholder="${f.placeholder}">${entry[f.id]||''}</textarea></div>`;
     }
-    return `<div class="doc-field"><label>${f.label}</label><input type="text" value="${val}" onchange="updateDocField('${type}',${idx},'${f.id}',this.value)" placeholder="${f.placeholder}"></div>`;
+    return `<div class="doc-field"><label>${f.label}</label><input type="text" data-field="${f.id}" value="${val}" onchange="updateDocField('${type}',${idx},'${f.id}',this.value)" placeholder="${f.placeholder}"></div>`;
   }).join('');
 
   const filesHtml=renderFileList(type,idx,entry.files||[]);
 
-  return `<div class="doc-card">
+  return `<div class="doc-card" id="card-${type}-${idx}">
     <div class="doc-card-header">
       <div class="doc-card-name">${schema.label} #${idx+1}</div>
       <button class="doc-card-del" onclick="pwdGate('deleteDocEntry_wrap','${type}|${idx}')" title="刪除">✕</button>
@@ -1328,18 +1598,21 @@ function renderDocEntry(type,entry,idx){
       </div>
       <div class="doc-file-list" id="files-${type}-${idx}">${filesHtml}</div>
     </div>
+    <div class="doc-card-footer">
+      <button class="doc-card-save" onclick="pwdGate('saveDocEntry_wrap','${type}|${idx}')">✓ 儲存資料</button>
+    </div>
   </div>`;
 }
 
 function renderCustomEntry(entry,idx){
   const filesHtml=renderFileList('custom',idx,entry.files||[]);
-  return `<div class="doc-card">
+  return `<div class="doc-card" id="card-custom-${idx}">
     <div class="doc-card-header">
       <div class="doc-card-name">${entry.category||'文件 #'+(idx+1)}</div>
       <button class="doc-card-del" onclick="pwdGate('deleteDocEntry_wrap','custom|${idx}')" title="刪除">✕</button>
     </div>
-    <div class="doc-field"><label>類別名稱</label><input type="text" value="${(entry.category||'').replace(/"/g,'&quot;')}" onchange="updateDocField('custom',${idx},'category',this.value)" placeholder="例如：飯店訂房確認"></div>
-    <div class="doc-field"><label>文件內容</label><textarea rows="3" onchange="updateDocField('custom',${idx},'content',this.value)" placeholder="訂單號碼、聯絡資訊、備註…">${entry.content||''}</textarea></div>
+    <div class="doc-field"><label>類別名稱</label><input type="text" data-field="category" value="${(entry.category||'').replace(/"/g,'&quot;')}" onchange="updateDocField('custom',${idx},'category',this.value)" placeholder="例如：飯店訂房確認"></div>
+    <div class="doc-field"><label>文件內容</label><textarea rows="3" data-field="content" onchange="updateDocField('custom',${idx},'content',this.value)" placeholder="訂單號碼、聯絡資訊、備註…">${entry.content||''}</textarea></div>
     <div class="doc-field"><label>上傳附件</label>
       <div class="doc-upload-area" onclick="document.getElementById('file-custom-${idx}').click()">
         <input type="file" id="file-custom-${idx}" multiple accept=".pdf,.jpg,.jpeg,.png,.gif,.webp" onchange="handleFileUpload('custom',${idx},this)">
@@ -1347,6 +1620,9 @@ function renderCustomEntry(entry,idx){
         <div class="doc-upload-label">點擊上傳 PDF / 圖片</div>
       </div>
       <div class="doc-file-list" id="files-custom-${idx}">${filesHtml}</div>
+    </div>
+    <div class="doc-card-footer">
+      <button class="doc-card-save" onclick="pwdGate('saveDocEntry_wrap','custom|${idx}')">✓ 儲存資料</button>
     </div>
   </div>`;
 }
@@ -1406,7 +1682,7 @@ function handleFileUpload(type,idx,input){
     reader.onload=e=>{
       data[type][idx].files.push({name:f.name,size:f.size,dataUrl:e.target.result});
       loaded++;
-      if(loaded===files.length){saveDocData(data);renderDocs();}
+      if(loaded===files.length){saveDocData(data);renderDocs();showToast('已上傳 '+files.length+' 個檔案 ✓');}
     };
     reader.readAsDataURL(f);
   });
@@ -1418,18 +1694,73 @@ function removeDocFile(type,idx,fi){
   if(data[type][idx]&&data[type][idx].files) data[type][idx].files.splice(fi,1);
   saveDocData(data);renderDocs();
 }
+
+function saveDocEntry(type,idx){
+  const card=document.getElementById('card-'+type+'-'+idx);
+  if(!card) return;
+  const data=getDocData();
+  const entry = type==='custom' ? data.custom[idx] : (data[type]&&data[type][idx]);
+  if(!entry) return;
+  card.querySelectorAll('[data-field]').forEach(el=>{ entry[el.dataset.field]=el.value; });
+  saveDocData(data);
+  showToast('已儲存 ✓');
+}
+window.saveDocEntry_wrap=function(arg){ const[t,i]=arg.split('|'); saveDocEntry(t,+i); };
+
+function showToast(msg){
+  let t=document.getElementById('app-toast');
+  if(!t){
+    t=document.createElement('div'); t.id='app-toast'; t.className='app-toast';
+    document.body.appendChild(t);
+  }
+  t.textContent=msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.classList.remove('show'),1800);
+}
 window.removeDocFile_wrap=function(arg){const[t,i,fi]=arg.split('|');removeDocFile(t,+i,+fi);};
 
 /* ═══════════════════════════════════════
    MAP
 ═══════════════════════════════════════ */
 let mapInited=false;
+let customLayerGroup=null;
+function extractLatLngFromUrl(url){
+  if(!url) return null;
+  let m = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if(m) return {lat:+m[1], lng:+m[2]};
+  m = url.match(/[?&](?:q|query)=(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if(m) return {lat:+m[1], lng:+m[2]};
+  m = url.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+  if(m) return {lat:+m[1], lng:+m[2]};
+  return null;
+}
+function getCustomMapPoints(){
+  const pts=[];
+  DAYS.forEach(day=>{
+    (DAY_EVENTS[day.date]||[]).forEach(ev=>{
+      if(!ev.gmap) return;
+      const c=extractLatLngFromUrl(ev.gmap);
+      if(c) pts.push({name:ev.tt, note:day.title+'　'+(ev.t||''), lat:c.lat, lng:c.lng, url:ev.gmap});
+    });
+  });
+  return pts;
+}
+function refreshCustomMapMarkers(){
+  if(!customLayerGroup) return;
+  customLayerGroup.clearLayers();
+  getCustomMapPoints().forEach(p=>{
+    const icon=L.divIcon({html:'<div style="font-size:22px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))">📍</div>',className:'',iconSize:[26,26],iconAnchor:[13,13]});
+    L.marker([p.lat,p.lng],{icon}).bindPopup(`<b style="font-size:.9rem">${p.name}</b><br><span style="font-size:.78rem;color:#666">${p.note}</span><br><a style="display:inline-block;margin-top:6px;padding:5px 11px;background:#405463;color:#fff;border-radius:7px;font-size:.73rem;font-weight:600;text-decoration:none" href="${p.url}" target="_blank" rel="noopener">Google Maps →</a>`).addTo(customLayerGroup);
+  });
+}
 function initMap(){
   if(mapInited)return;mapInited=true;
   const map=L.map('leaflet-map',{scrollWheelZoom:true}).setView([13.75,100.55],11);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(map);
-  const groups={hotel:L.layerGroup(),transport:L.layerGroup(),food:L.layerGroup(),shop:L.layerGroup(),attr:L.layerGroup(),massage:L.layerGroup()};
-  const labels={hotel:'🏨 飯店',transport:'✈️ 交通',food:'🍴 餐飲',shop:'🛍️ 市集',attr:'🏛️ 景點',massage:'💆 按摩'};
+  const groups={hotel:L.layerGroup(),transport:L.layerGroup(),food:L.layerGroup(),shop:L.layerGroup(),attr:L.layerGroup(),massage:L.layerGroup(),custom:L.layerGroup()};
+  const labels={hotel:'🏨 飯店',transport:'✈️ 交通',food:'🍴 餐飲',shop:'🛍️ 市集',attr:'🏛️ 景點',massage:'💆 按摩',custom:'📍 我新增的行程'};
+  customLayerGroup=groups.custom;
   POIS.forEach(p=>{
     const icon=L.divIcon({html:'<div style="font-size:22px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))">'+p.ic+'</div>',className:'',iconSize:[26,26],iconAnchor:[13,13]});
     const gm=p.url||('https://www.google.com/maps/dir/?api=1&destination='+p.lat+','+p.lng);
@@ -1437,32 +1768,41 @@ function initMap(){
   });
   const overlays={};Object.keys(groups).forEach(k=>{groups[k].addTo(map);overlays[labels[k]]=groups[k];});
   L.control.layers(null,overlays,{collapsed:false}).addTo(map);
+  refreshCustomMapMarkers();
 }
 
 /* ═══════════════════════════════════════
    CURRENCY
 ═══════════════════════════════════════ */
 let currentRate=null,currencyInited=false;
-async function initCurrency(){
-  if(currencyInited)return;currencyInited=true;
-  const big=document.getElementById('rateBig'),upd=document.getElementById('rateUpdated');
+async function ensureRate(){
+  if(currentRate) return currentRate;
   try{
     const d=await(await fetch('https://open.er-api.com/v6/latest/TWD')).json();
     if(d.result!=='success'||!d.rates?.THB) throw new Error();
     currentRate=d.rates.THB;
     localStorage.setItem('bkk2_rate',JSON.stringify({rate:currentRate,date:d.time_last_update_utc||''}));
-    big.textContent=currentRate.toFixed(3)+' THB';
-    upd.textContent='更新：'+d.time_last_update_utc;
   }catch(e){
     try{
       const d=await(await fetch('https://open.er-api.com/v6/latest/USD')).json();
       currentRate=d.rates.THB/d.rates.TWD;
-      big.textContent=currentRate.toFixed(3)+' THB';upd.textContent='USD 交叉換算';
     }catch(e2){
       const c=JSON.parse(localStorage.getItem('bkk2_rate')||'null');
-      if(c){currentRate=c.rate;big.textContent=currentRate.toFixed(3)+' THB';upd.textContent='離線快取（'+c.date+'）';}
-      else{big.textContent='無法取得';upd.textContent='請確認網路連線';}
+      if(c) currentRate=c.rate;
     }
+  }
+  return currentRate;
+}
+async function initCurrency(){
+  if(currencyInited)return;currencyInited=true;
+  const big=document.getElementById('rateBig'),upd=document.getElementById('rateUpdated');
+  const rate=await ensureRate();
+  if(rate){
+    big.textContent=rate.toFixed(3)+' THB';
+    const c=JSON.parse(localStorage.getItem('bkk2_rate')||'null');
+    upd.textContent=c&&c.date ? '更新：'+c.date : '即時匯率';
+  }else{
+    big.textContent='無法取得';upd.textContent='請確認網路連線';
   }
   renderRateTable();bindConvert();runConvert('twd');
 }
@@ -1470,7 +1810,7 @@ function renderRateTable(){
   if(!currentRate)return;
   const amts=[100,300,500,1000,3000,5000,10000];
   document.getElementById('rateTable').innerHTML=amts.map(t=>`
-    <div class="rate-table-row">
+    <div class="rate-table-row-sm">
       <span class="r-twd">NT$ ${t.toLocaleString()}</span>
       <span class="r-thb">฿ ${(t*currentRate).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,',')}</span>
     </div>`).join('');
@@ -1486,6 +1826,138 @@ function runConvert(dir){
   else tw.value=(+(th.value)||0)/currentRate!==0?((+(th.value)||0)/currentRate).toFixed(2):'';
 }
 function flipConvert(){const tw=document.getElementById('twdInput'),th=document.getElementById('thbInput');const tmp=tw.value;tw.value=th.value;th.value=tmp;}
+
+/* ═══════════════════════════════════════
+   LEDGER (記帳)
+═══════════════════════════════════════ */
+function escLed(s){ return (s||'').toString().replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+let LEDGER=[];
+try{ LEDGER=JSON.parse(localStorage.getItem('bkk2_ledger')||'[]'); }catch(e){ LEDGER=[]; }
+function saveLedger(){ localStorage.setItem('bkk2_ledger',JSON.stringify(LEDGER)); }
+
+let ledCurrency='TWD';
+let ledSplit=new Set(['SYW','ZYW','JJ']);
+
+function setLedCur(cur){
+  ledCurrency=cur;
+  document.querySelectorAll('#ledCurToggle .cur-opt').forEach(b=>b.classList.toggle('active',b.dataset.cur===cur));
+  updateLedFxHint();
+}
+function toggleSplit(m){
+  const btn=document.querySelector('.split-chip[data-m="'+m+'"]');
+  if(ledSplit.has(m)){
+    if(ledSplit.size>1){ ledSplit.delete(m); btn.classList.remove('active'); }
+  }else{ ledSplit.add(m); btn.classList.add('active'); }
+}
+async function updateLedFxHint(){
+  const hint=document.getElementById('ledFxHint');
+  const amtEl=document.getElementById('ledAmount');
+  const amt=parseFloat(amtEl.value);
+  if(!hint) return;
+  if(!amt){ hint.textContent=''; return; }
+  const rate=await ensureRate();
+  if(!rate){ hint.textContent='（匯率暫時無法取得，稍後會自動重試）'; return; }
+  if(ledCurrency==='TWD') hint.textContent='≈ ฿ '+(amt*rate).toFixed(0)+' THB';
+  else hint.textContent='≈ NT$ '+(amt/rate).toFixed(0)+' TWD';
+}
+
+function addLedgerEntry(){
+  const itemEl=document.getElementById('ledItem');
+  const amtEl=document.getElementById('ledAmount');
+  const item=itemEl.value.trim();
+  const amount=parseFloat(amtEl.value);
+  if(!item){ itemEl.focus(); return; }
+  if(!amount){ amtEl.focus(); return; }
+  commitLedgerEntry();
+}
+function commitLedgerEntry(){
+  const dateEl=document.getElementById('ledDate');
+  const itemEl=document.getElementById('ledItem');
+  const amtEl=document.getElementById('ledAmount');
+  const noteEl=document.getElementById('ledNote');
+  const entry={
+    id:'led-'+Date.now(),
+    date: dateEl.value || todayStr(),
+    item: itemEl.value.trim(),
+    amount: parseFloat(amtEl.value)||0,
+    currency: ledCurrency,
+    split: Array.from(ledSplit),
+    note: noteEl.value.trim()
+  };
+  if(!entry.item || !entry.amount) return;
+  LEDGER.push(entry);
+  saveLedger();
+  itemEl.value=''; amtEl.value=''; noteEl.value='';
+  document.getElementById('ledFxHint').textContent='';
+  renderLedger();
+  showToast('已新增一筆記帳 ✓');
+}
+window.commitLedgerEntry=commitLedgerEntry;
+
+function removeLedgerEntry(id){ removeLedgerEntry_impl(id); }
+function removeLedgerEntry_impl(id){
+  LEDGER=LEDGER.filter(e=>e.id!==id);
+  saveLedger();
+  renderLedger();
+}
+window.removeLedgerEntry_impl=removeLedgerEntry_impl;
+
+function renderLedger(){
+  const summaryEl=document.getElementById('ledgerSummary');
+  const listEl=document.getElementById('ledgerList');
+  if(!summaryEl||!listEl) return;
+  const rate=currentRate;
+
+  let totalTWD=0, totalTHB=0;
+  const perPersonTWD={SYW:0,ZYW:0,JJ:0};
+  const perPersonTHB={SYW:0,ZYW:0,JJ:0};
+  LEDGER.forEach(e=>{
+    const twd = e.currency==='TWD' ? e.amount : (rate ? e.amount/rate : null);
+    const thb = e.currency==='THB' ? e.amount : (rate ? e.amount*rate : null);
+    if(twd!=null) totalTWD+=twd;
+    if(thb!=null) totalTHB+=thb;
+    // Split in the entry's own currency so this works even before the
+    // exchange rate has loaded (no silent 0 while waiting on the API).
+    if(e.split && e.split.length){
+      const per = e.amount / e.split.length;
+      const bucket = e.currency==='TWD' ? perPersonTWD : perPersonTHB;
+      e.split.forEach(m=>{ if(bucket[m]!=null) bucket[m]+=per; });
+    }
+  });
+
+  summaryEl.innerHTML = `
+    <div class="ledger-total-row">
+      <div><div class="ledger-total-label">總支出 TWD</div><div class="ledger-total-value">NT$ ${totalTWD.toLocaleString(undefined,{maximumFractionDigits:0})}</div></div>
+      <div><div class="ledger-total-label">總支出 THB</div><div class="ledger-total-value">฿ ${totalTHB.toLocaleString(undefined,{maximumFractionDigits:0})}</div></div>
+    </div>
+    <div class="ledger-per-person">
+      ${['SYW','ZYW','JJ'].map(m=>`<div class="ledger-person"><span>${m}</span><b>NT$ ${Math.round(perPersonTWD[m]).toLocaleString()}</b>${perPersonTHB[m] ? '<b class="ledger-person-thb">฿ '+Math.round(perPersonTHB[m]).toLocaleString()+'</b>' : ''}</div>`).join('')}
+    </div>
+    ${rate ? '' : '<div class="ledger-fx-hint" style="margin-top:10px;">尚未取得即時匯率，兩種幣別的加總暫時無法互相換算（各自幣別的分攤金額不受影響）；可先到「匯率」頁籤刷新一次。</div>'}
+  `;
+
+  listEl.innerHTML = LEDGER.slice().sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id)).map(e=>{
+    const other = e.currency==='TWD'
+      ? (rate ? '≈ ฿ '+(e.amount*rate).toFixed(0) : '')
+      : (rate ? '≈ NT$ '+(e.amount/rate).toFixed(0) : '');
+    return `<div class="ledger-item">
+      <div class="ledger-item-h">
+        <div><span class="ledger-item-date">${e.date}</span><b>${escLed(e.item)}</b></div>
+        <button class="doc-card-del" onclick="removeLedgerEntry('${e.id}')" title="刪除">✕</button>
+      </div>
+      <div class="ledger-item-amt">${e.currency==='TWD'?'NT$':'฿'} ${e.amount.toLocaleString()}<span class="ledger-item-fx">${other}</span></div>
+      <div class="ledger-item-meta">分攤：${e.split&&e.split.length?e.split.join(' / '):'—'}${e.note?' ・ '+escLed(e.note):''}</div>
+    </div>`;
+  }).join('') || '<div class="doc-item empty" style="padding:14px 4px;color:var(--text3);font-size:.85rem;">尚未有記帳紀錄</div>';
+}
+
+(function initLedgerForm(){
+  const dateEl=document.getElementById('ledDate');
+  if(dateEl && !dateEl.value) dateEl.value=todayStr();
+  const amtEl=document.getElementById('ledAmount');
+  if(amtEl) amtEl.addEventListener('input', updateLedFxHint);
+})();
 
 /* ═══════════════════════════════════════
    WEATHER
@@ -1530,10 +2002,12 @@ async function initWeather(){
 function init(){
   renderChecklist('pack');
   renderChecklist(currentWishSub);
+  renderLedger();
   updateBoardAndStatus();
   renderDayStage();
   setInterval(()=>{updateBoardAndStatus();renderDayStage();},60000);
   document.querySelectorAll('.tab-btn[data-tab="home"]').forEach(b=>b.classList.add('active'));
+  ensureRate().then(()=>{ renderLedger(); });
 }
 
 /* Auto-init on load */
