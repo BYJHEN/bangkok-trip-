@@ -373,12 +373,37 @@ input,textarea,select{font-family:var(--font-body)}
   color:var(--danger);font-size:.9rem;padding:2px 5px;opacity:.4;
 }
 .ev-rm:hover{opacity:1}
+
+/* compact transit/movement segments (e.g. "walk 10 min", "Grab to airport") */
+.ev.transit{padding-bottom:10px;}
+.ev.transit::before{background:var(--bg2);border-color:var(--text3);border-style:dashed;}
+.ev-transit-row{display:flex;align-items:center;gap:6px;}
+.ev-transit-ic{font-size:.85rem;flex-shrink:0;}
+.ev-transit-label{font-size:.78rem;color:var(--text2);font-weight:500;}
+.ev-transit-time{
+  margin-left:auto;font-family:var(--font-num);font-size:.66rem;color:var(--text3);
+  flex-shrink:0;padding-left:8px;
+}
+.ev-transit-dd{font-size:.72rem;color:var(--text3);margin-top:2px;padding-left:22px;}
+.ev.transit .ev-links{padding-left:22px;margin-top:4px;}
+.ev.transit .ev-link-btn{padding:2px 8px;font-size:.66rem;border-radius:5px;}
 .add-ev{
   margin-top:18px;padding-top:16px;border-top:1px dashed var(--div);
   display:flex;flex-direction:column;gap:9px;
 }
 .add-ev-h{font-size:.78rem;font-weight:700;color:var(--text3);margin-bottom:2px;letter-spacing:.04em}
 .add-ev-row{display:flex;gap:8px}
+.icon-quickpick{display:flex;flex-wrap:wrap;gap:6px;}
+.icon-quickpick button{
+  border:1.5px solid var(--div);background:var(--card);border-radius:8px;
+  width:34px;height:34px;font-size:1rem;cursor:pointer;flex-shrink:0;
+}
+.icon-quickpick button:active{background:var(--bg2);}
+.ev-checkbox{
+  display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--text2);
+  cursor:pointer;line-height:1.4;
+}
+.ev-checkbox input[type=checkbox]{width:16px;height:16px;flex-shrink:0;accent-color:var(--primary);}
 .add-ev-hint{font-size:.68rem;color:var(--text3);line-height:1.5;margin-top:-4px;}
 .add-ev input,.add-ev textarea{
   border:1.5px solid var(--div);background:var(--bg);border-radius:var(--r-xs);
@@ -786,6 +811,23 @@ input,textarea,select{font-family:var(--font-body)}
         <input type="text" id="edit-ev-ic" maxlength="4" placeholder="✈️">
       </div>
     </div>
+    <div class="icon-quickpick">
+      <button type="button" onclick="pickIcon('edit-ev-ic','✈️')">✈️</button>
+      <button type="button" onclick="pickIcon('edit-ev-ic','🚕')">🚕</button>
+      <button type="button" onclick="pickIcon('edit-ev-ic','🚶')">🚶</button>
+      <button type="button" onclick="pickIcon('edit-ev-ic','🚇')">🚇</button>
+      <button type="button" onclick="pickIcon('edit-ev-ic','🚌')">🚌</button>
+      <button type="button" onclick="pickIcon('edit-ev-ic','🚢')">🚢</button>
+      <button type="button" onclick="pickIcon('edit-ev-ic','🏨')">🏨</button>
+      <button type="button" onclick="pickIcon('edit-ev-ic','🍜')">🍜</button>
+      <button type="button" onclick="pickIcon('edit-ev-ic','☕')">☕</button>
+      <button type="button" onclick="pickIcon('edit-ev-ic','💆')">💆</button>
+      <button type="button" onclick="pickIcon('edit-ev-ic','🛍️')">🛍️</button>
+      <button type="button" onclick="pickIcon('edit-ev-ic','🏛️')">🏛️</button>
+      <button type="button" onclick="pickIcon('edit-ev-ic','📸')">📸</button>
+      <button type="button" onclick="pickIcon('edit-ev-ic','🎭')">🎭</button>
+      <button type="button" onclick="pickIcon('edit-ev-ic','📌')">📌</button>
+    </div>
     <div class="edit-field">
       <label>行程標題</label>
       <input type="text" id="edit-ev-tt" placeholder="例如：大皇宮參觀">
@@ -794,6 +836,7 @@ input,textarea,select{font-family:var(--font-body)}
       <label>備註說明</label>
       <textarea id="edit-ev-dd" rows="3" placeholder="備註、注意事項、聯絡資訊…"></textarea>
     </div>
+    <label class="ev-checkbox"><input type="checkbox" id="edit-ev-transit"> 🚶 標示為交通／移動時間（畫面會顯示成精簡的一行）</label>
     <div class="edit-field">
       <label>Google Maps 連結</label>
       <input type="url" id="edit-ev-gmap" placeholder="https://maps.app.goo.gl/…">
@@ -1364,7 +1407,7 @@ const DAYS = [
       {t:'19:00–20:30', ic:'🍴', tt:'輕鬆吃', dd:'Terminal 21 美食街（便宜好喝的泰奶與道地小吃）'},
     ]
   },
-  { date:'2027-01-24', wd:'Sun', title:'Day 2 · 週末限定', theme:'🛍️ 市集與夜生活（包車）', band:'jade',
+  { date:'2027-01-24', wd:'Sun', title:'Day 2 · 週末限定', theme:'🛍️ 市集與夜生活（MRT＋Grab）', band:'jade',
     events:[
       {t:'10:00–15:00', ic:'🛍️', tt:'恰圖恰週末市集', dd:'世界最大露天市集，挖寶服飾、手工藝品'},
       {t:'15:30–18:00', ic:'☕', tt:'咖啡廳或按摩', dd:'自由安排，稍作休息'},
@@ -1500,13 +1543,17 @@ function removeDayEvent(date,id){
   saveDayEvents(date);renderDayStage();
   refreshCustomMapMarkers();
 }
+function pickIcon(inputId, ic){
+  document.getElementById(inputId).value = ic;
+}
 function addDayEvent(date){
   const g=id=>document.getElementById(id);
   const tt=g('newEvTitle').value.trim();
   if(!tt){g('newEvTitle').focus();return;}
-  const ev={id:'ev-'+date+'-'+Date.now(),t:g('newEvTime').value.trim()||'—',ic:g('newEvIcon').value.trim()||'📌',tt,dd:g('newEvDesc').value.trim(),gmap:g('newEvGmap').value.trim(),latlng:g('newEvLatLng').value.trim(),attachUrl:g('newEvAttach').value.trim()};
+  const ev={id:'ev-'+date+'-'+Date.now(),t:g('newEvTime').value.trim()||'—',ic:g('newEvIcon').value.trim()||'📌',tt,dd:g('newEvDesc').value.trim(),transit:g('newEvTransit').checked,gmap:g('newEvGmap').value.trim(),latlng:g('newEvLatLng').value.trim(),attachUrl:g('newEvAttach').value.trim()};
   DAY_EVENTS[date].push(ev);saveDayEvents(date);
   ['newEvTime','newEvIcon','newEvTitle','newEvDesc','newEvGmap','newEvLatLng','newEvAttach'].forEach(id=>g(id).value='');
+  g('newEvTransit').checked=false;
   renderDayStage();
   refreshCustomMapMarkers();
 }
@@ -1544,6 +1591,22 @@ function renderDayStage(){
     const gmapHtml=ev.gmap?`<a href="${ev.gmap}" target="_blank" rel="noopener" class="ev-link-btn">🗺️ Google Maps</a>`:'';
     const attachHtml=ev.attachUrl?`<a href="${ev.attachUrl}" target="_blank" rel="noopener" class="ev-link-btn ev-link-attach">📎 附件</a>`:'';
     const linksHtml=(gmapHtml||attachHtml)?`<div class="ev-links">${gmapHtml}${attachHtml}</div>`:'';
+    const isTransit = ev.transit===true || /分鐘|步行|走路|搭乘|轉乘|騎車|騎乘/.test(ev.tt||'');
+
+    if(isTransit){
+      return `<div class="ev transit ${nowFlag?'now':''}">
+        <button class="ev-edit" onclick="openEditModal('${day.date}','${ev.id}')" title="編輯">編輯</button>
+        <button class="ev-rm" onclick="removeDayEvent_wrap('${day.date}|${ev.id}')" title="移除">✕</button>
+        <div class="ev-transit-row">
+          <span class="ev-transit-ic">${ev.ic}</span>
+          <span class="ev-transit-label">${ev.tt}</span>
+          <span class="ev-transit-time">${ev.t}${nowFlag?'<span class="now-tag">進行中</span>':''}</span>
+        </div>
+        ${ev.dd?`<div class="ev-transit-dd">${ev.dd}</div>`:''}
+        ${linksHtml}
+      </div>`;
+    }
+
     return `<div class="ev ${nowFlag?'now':''}">
       <button class="ev-edit" onclick="openEditModal('${day.date}','${ev.id}')" title="編輯">編輯</button>
       <button class="ev-rm" onclick="removeDayEvent_wrap('${day.date}|${ev.id}')" title="移除">✕</button>
@@ -1560,8 +1623,26 @@ function renderDayStage(){
       <input id="newEvTime" placeholder="時間 19:00–20:30" style="flex:1.4">
       <input id="newEvIcon" placeholder="🍜" maxlength="4" style="flex:0.5">
     </div>
+    <div class="icon-quickpick">
+      <button type="button" onclick="pickIcon('newEvIcon','✈️')">✈️</button>
+      <button type="button" onclick="pickIcon('newEvIcon','🚕')">🚕</button>
+      <button type="button" onclick="pickIcon('newEvIcon','🚶')">🚶</button>
+      <button type="button" onclick="pickIcon('newEvIcon','🚇')">🚇</button>
+      <button type="button" onclick="pickIcon('newEvIcon','🚌')">🚌</button>
+      <button type="button" onclick="pickIcon('newEvIcon','🚢')">🚢</button>
+      <button type="button" onclick="pickIcon('newEvIcon','🏨')">🏨</button>
+      <button type="button" onclick="pickIcon('newEvIcon','🍜')">🍜</button>
+      <button type="button" onclick="pickIcon('newEvIcon','☕')">☕</button>
+      <button type="button" onclick="pickIcon('newEvIcon','💆')">💆</button>
+      <button type="button" onclick="pickIcon('newEvIcon','🛍️')">🛍️</button>
+      <button type="button" onclick="pickIcon('newEvIcon','🏛️')">🏛️</button>
+      <button type="button" onclick="pickIcon('newEvIcon','📸')">📸</button>
+      <button type="button" onclick="pickIcon('newEvIcon','🎭')">🎭</button>
+      <button type="button" onclick="pickIcon('newEvIcon','📌')">📌</button>
+    </div>
     <input id="newEvTitle" placeholder="行程標題">
     <input id="newEvDesc" placeholder="備註說明（選填）">
+    <label class="ev-checkbox"><input type="checkbox" id="newEvTransit"> 🚶 標示為交通／移動時間（畫面會顯示成精簡的一行，不是完整卡片）</label>
     <input id="newEvGmap" type="url" placeholder="Google Maps 連結（選填）">
     <input id="newEvLatLng" type="text" placeholder="地圖座標（選填，格式：13.7437,100.4888）">
     <input id="newEvAttach" type="url" placeholder="附件連結（選填，訂單/票券/QRcode等）">
@@ -1609,6 +1690,7 @@ function openEditModal(date, id){
   g('edit-ev-gmap').value = ev.gmap || '';
   g('edit-ev-latlng').value = ev.latlng || '';
   g('edit-ev-attach').value = ev.attachUrl || '';
+  g('edit-ev-transit').checked = !!ev.transit;
   document.getElementById('edit-modal').classList.add('open');
   setTimeout(()=>g('edit-ev-tt').focus(),120);
 }
@@ -1628,6 +1710,7 @@ function saveEditEvent(){
     ic:   g('edit-ev-ic').value.trim()||'📌',
     tt,
     dd:   g('edit-ev-dd').value.trim().replace(/\n/g,'<br>'),
+    transit: g('edit-ev-transit').checked,
     gmap: g('edit-ev-gmap').value.trim(),
     latlng: g('edit-ev-latlng').value.trim(),
     attachUrl: g('edit-ev-attach').value.trim(),
