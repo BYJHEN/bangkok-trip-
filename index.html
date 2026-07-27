@@ -1480,10 +1480,16 @@ function renderDayDots(){
     `<button class="day-dot ${i===currentDayIndex?'active':''}${d.date===t?' today-dot':''}" onclick="goDay(${i})">Day${i+1}</button>`
   ).join('');
 }
+function evStartMinutes(t){
+  if(!t) return 99999;
+  const m = t.match(/(\d{1,2}):(\d{2})/);
+  if(!m) return 99999;
+  return (+m[1])*60 + (+m[2]);
+}
 function renderDayStage(){
   const stage=document.getElementById('dayStage');
   const t=todayStr(),now=new Date(),day=DAYS[currentDayIndex];
-  const events=DAY_EVENTS[day.date]||[];
+  const events=(DAY_EVENTS[day.date]||[]).slice().sort((a,b)=>evStartMinutes(a.t)-evStartMinutes(b.t));
   const isToday=day.date===t,isPast=day.date<t;
   const pill=isToday?'<span class="today-pill">TODAY</span>':(isPast?'<span class="past-pill">已完成</span>':'');
 
