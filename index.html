@@ -538,22 +538,11 @@ input,textarea,select{font-family:var(--font-body)}
 }
 .doc-field input:focus,.doc-field textarea:focus{border-color:var(--primary)}
 .doc-field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
-.doc-upload-area{
-  border:1.5px dashed var(--div);border-radius:var(--r-xs);
-  padding:14px;text-align:center;cursor:pointer;
-  background:var(--bg);transition:border-color .2s;
+.doc-attach-link{
+  display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;
+  color:var(--primary);text-decoration:none;margin-bottom:4px;
 }
-.doc-upload-area:hover{border-color:var(--primary)}
-.doc-upload-area input[type=file]{display:none}
-.doc-upload-label{font-size:.78rem;color:var(--text3);margin-top:4px}
-.doc-file-list{margin-top:8px;display:flex;flex-direction:column;gap:4px}
-.doc-file-item{
-  display:flex;align-items:center;gap:8px;padding:7px 10px;
-  background:rgba(64,84,99,.06);border-radius:8px;font-size:.78rem;color:var(--text2);
-}
-.doc-file-item .df-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.doc-file-rm{border:none;background:none;color:var(--text3);font-size:.82rem;padding:2px 4px;opacity:.5}
-.doc-file-rm:hover{opacity:1;color:var(--danger)}
+.doc-attach-link:hover{text-decoration:underline;}
 .doc-card-footer{display:flex;justify-content:flex-end;margin-top:12px;padding-top:12px;border-top:1px solid var(--div)}
 .doc-card-save{
   border:none;background:var(--primary);color:#fff;border-radius:999px;
@@ -706,26 +695,6 @@ input,textarea,select{font-family:var(--font-body)}
 .flight-field b{color:var(--text);font-family:var(--font-num);font-weight:600;}
 .flight-disclaimer{font-size:.7rem;color:var(--text3);margin-top:14px;text-align:left;line-height:1.5;}
 
-/* ── FILE PREVIEW MODAL ── */
-#file-preview-modal{
-  position:fixed;inset:0;z-index:520;
-  background:rgba(30,40,50,.65);backdrop-filter:blur(8px);
-  display:none;align-items:center;justify-content:center;padding:16px;
-}
-#file-preview-modal.open{display:flex}
-.file-preview-sheet{
-  background:var(--card);border-radius:var(--r);padding:16px;width:100%;max-width:560px;
-  box-shadow:0 10px 40px rgba(0,0,0,.25);max-height:90vh;overflow-y:auto;
-}
-.file-preview-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:10px;}
-.file-preview-name{font-size:.9rem;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.file-preview-download{
-  display:block;text-align:center;margin-top:12px;padding:11px;border-radius:var(--r-xs);
-  background:var(--primary);color:#fff;font-size:.85rem;font-weight:700;text-decoration:none;
-}
-.doc-file-open{display:flex;align-items:center;gap:8px;flex:1;min-width:0;cursor:pointer;}
-.doc-file-open:hover .df-name{text-decoration:underline;}
-
 /* ── LOADING / ERROR ── */
 .loading{text-align:center;padding:36px 20px;color:var(--text3);font-size:.85rem}
 .spinner{
@@ -759,7 +728,7 @@ input,textarea,select{font-family:var(--font-body)}
 <div id="edit-modal">
   <div class="edit-sheet">
     <h3>✏️ 編輯行程</h3>
-    <div class="edit-sub">修改後點「儲存」需輸入密碼確認</div>
+    <div class="edit-sub">修改後點「儲存」即可套用變更</div>
     <input type="hidden" id="edit-ev-date">
     <input type="hidden" id="edit-ev-id">
     <div class="edit-field-row">
@@ -786,7 +755,7 @@ input,textarea,select{font-family:var(--font-body)}
     </div>
     <div class="edit-actions">
       <button class="edit-cancel-btn" onclick="closeEditModal()">取消</button>
-      <button class="edit-save-btn" onclick="saveEditEvent()">🔒 儲存（需密碼）</button>
+      <button class="edit-save-btn" onclick="saveEditEvent()">儲存</button>
     </div>
   </div>
 </div>
@@ -828,18 +797,6 @@ input,textarea,select{font-family:var(--font-body)}
     <div class="flight-field"><span>飛行時間</span><b id="flight-dur">—</b></div>
 
     <div class="flight-disclaimer">＊以訂票資料排定時間為準，非即時航班動態；實際登機門與起降時間請以機場現場公告為準。</div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════ FILE PREVIEW MODAL ═══════════════════════════ -->
-<div id="file-preview-modal">
-  <div class="file-preview-sheet">
-    <div class="file-preview-head">
-      <div class="file-preview-name" id="file-preview-name">檔案預覽</div>
-      <button class="flight-close" onclick="closeFilePreview()">✕</button>
-    </div>
-    <div id="file-preview-body"></div>
-    <a class="file-preview-download" id="file-preview-download" download>⬇ 下載原始檔案</a>
   </div>
 </div>
 
@@ -997,7 +954,7 @@ input,textarea,select{font-family:var(--font-body)}
     <div class="page-head"><h2>行李清單</h2><div class="sub">勾選完成 · 可自訂新增</div></div>
     <div class="list-tools">
       <input type="text" id="packInput" placeholder="新增物品，例如：轉接頭">
-      <button onclick="pwdGate('addItem','pack')">新增</button>
+      <button onclick="addItem('pack')">新增</button>
     </div>
     <div class="progress-bar-wrap"><div class="progress-bar-fill" id="packBar" style="width:0%"></div></div>
     <div class="list-progress" id="packProgress"></div>
@@ -1014,7 +971,7 @@ input,textarea,select{font-family:var(--font-body)}
     </div>
     <div class="list-tools">
       <input type="text" id="wishInput" placeholder="新增品項">
-      <button onclick="pwdGate('addItem',currentWishSub)">新增</button>
+      <button onclick="addItem(currentWishSub)">新增</button>
     </div>
     <div class="progress-bar-wrap"><div class="progress-bar-fill" id="wishBar" style="width:0%"></div></div>
     <div class="list-progress" id="wishProgress"></div>
@@ -1029,7 +986,7 @@ input,textarea,select{font-family:var(--font-body)}
     <div class="doc-section" id="doc-insurance-section">
       <div class="doc-section-head">
         <div class="doc-section-title">🛡️ 保險資料</div>
-        <button class="doc-add-btn" onclick="pwdGate('addDocEntry','insurance')">＋ 新增</button>
+        <button class="doc-add-btn" onclick="addDocEntry('insurance')">＋ 新增</button>
       </div>
       <div id="doc-insurance-list"></div>
     </div>
@@ -1040,7 +997,7 @@ input,textarea,select{font-family:var(--font-body)}
     <div class="doc-section" id="doc-visa-section">
       <div class="doc-section-head">
         <div class="doc-section-title">🗺️ 簽證資訊</div>
-        <button class="doc-add-btn" onclick="pwdGate('addDocEntry','visa')">＋ 新增</button>
+        <button class="doc-add-btn" onclick="addDocEntry('visa')">＋ 新增</button>
       </div>
       <div id="doc-visa-list"></div>
     </div>
@@ -1051,7 +1008,7 @@ input,textarea,select{font-family:var(--font-body)}
     <div class="doc-section" id="doc-custom-section">
       <div class="doc-section-head">
         <div class="doc-section-title">📄 其他文件</div>
-        <button class="doc-add-btn" onclick="pwdGate('addDocCategory',null)">＋ 新增類別</button>
+        <button class="doc-add-btn" onclick="addDocCategory()">＋ 新增類別</button>
       </div>
       <div id="doc-custom-list"></div>
     </div>
@@ -1231,7 +1188,6 @@ function openFlightModal(code){
 }
 function closeFlightModal(){ document.getElementById('flight-modal').classList.remove('open'); }
 document.getElementById('flight-modal').addEventListener('click', e=>{ if(e.target.id==='flight-modal') closeFlightModal(); });
-document.getElementById('file-preview-modal').addEventListener('click', e=>{ if(e.target.id==='file-preview-modal') closeFilePreview(); });
 
 const DAYS = [
   { date:'2027-01-23', wd:'Sat', title:'Day 1 · 抵達曼谷', theme:'🛬 抵達曼谷 · 開啟旅程', band:'jade',
@@ -1313,18 +1269,7 @@ function _goView(name){
   if(name==='ledger'){ renderLedger(); initCurrency(); ensureRate().then(renderLedger); }
 }
 function go(name){
-  if(name==='docs'){
-    // 文件頁籤需要密碼
-    _pwdCallback = ()=>{ closePwdModal(); _goView('docs'); };
-    document.getElementById('pwd-modal-title').textContent = '📂 文件頁籤';
-    document.getElementById('pwd-modal-desc').textContent  = '請輸入密碼以查看旅遊文件';
-    document.getElementById('pwd-modal').classList.add('open');
-    document.getElementById('pwd-modal-input').value='';
-    document.getElementById('pwd-modal-err').textContent='';
-    setTimeout(()=>document.getElementById('pwd-modal-input').focus(),120);
-  } else {
-    _goView(name);
-  }
+  _goView(name);
 }
 
 /* ═══════════════════════════════════════
@@ -1421,7 +1366,7 @@ function renderDayStage(){
     const gmapHtml=ev.gmap?`<div style="margin-top:5px"><a href="${ev.gmap}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:var(--primary);color:#fff;border-radius:6px;font-size:.72rem;font-weight:600;text-decoration:none">🗺️ Google Maps</a></div>`:'';
     return `<div class="ev ${nowFlag?'now':''}">
       <button class="ev-edit" onclick="openEditModal('${day.date}','${ev.id}')" title="編輯">編輯</button>
-      <button class="ev-rm" onclick="pwdGate('removeDayEvent_wrap','${day.date}|${ev.id}')" title="移除">✕</button>
+      <button class="ev-rm" onclick="removeDayEvent_wrap('${day.date}|${ev.id}')" title="移除">✕</button>
       <div class="ev-t"><span class="ev-ic">${ev.ic}</span>${ev.t}${nowFlag?'<span class="now-tag">進行中</span>':''}</div>
       <div class="ev-tt">${ev.tt}</div>
       ${ev.dd?`<div class="ev-dd">${ev.dd}</div>`:''}
@@ -1430,7 +1375,7 @@ function renderDayStage(){
   }).join('')||'<div class="ev-dd" style="padding-left:4px;font-size:.85rem;color:var(--text3)">這天還沒有行程，新增第一個吧！</div>';
 
   const addF=`<div class="add-ev">
-    <div class="add-ev-h">＋ 新增行程（需密碼）</div>
+    <div class="add-ev-h">＋ 新增行程</div>
     <div class="add-ev-row">
       <input id="newEvTime" placeholder="時間 19:00–20:30" style="flex:1.4">
       <input id="newEvIcon" placeholder="🍜" maxlength="4" style="flex:0.5">
@@ -1439,7 +1384,7 @@ function renderDayStage(){
     <input id="newEvDesc" placeholder="備註說明（選填）">
     <input id="newEvGmap" type="url" placeholder="Google Maps 連結（選填）">
     <div class="add-ev-hint">含座標的完整 Google Maps 連結（網址列含 @緯度,經度）才能自動顯示在「地圖」頁籤上；短網址 maps.app.goo.gl 僅會顯示按鈕，不會加地圖釘。</div>
-    <button class="add-ev-btn" onclick="pwdGate('addDayEvent','${day.date}')">新增行程</button>
+    <button class="add-ev-btn" onclick="addDayEvent('${day.date}')">新增行程</button>
   </div>`;
 
   stage.innerHTML=`<div class="day-card ${isToday?'today':''}">
@@ -1494,7 +1439,6 @@ function saveEditEvent(){
   const date=g('edit-ev-date').value, id=g('edit-ev-id').value;
   const tt=g('edit-ev-tt').value.trim();
   if(!tt){ g('edit-ev-tt').focus(); return; }
-  // capture values before modal closes
   const updated={
     t:    g('edit-ev-time').value.trim()||'—',
     ic:   g('edit-ev-ic').value.trim()||'📌',
@@ -1502,23 +1446,13 @@ function saveEditEvent(){
     dd:   g('edit-ev-dd').value.trim().replace(/\n/g,'<br>'),
     gmap: g('edit-ev-gmap').value.trim(),
   };
-  // password gate — then apply
-  _pwdCallback=()=>{
-    closePwdModal();
-    const events=DAY_EVENTS[date]||[];
-    const idx=events.findIndex(e=>e.id===id);
-    if(idx>=0) Object.assign(events[idx], updated);
-    saveDayEvents(date);
-    closeEditModal();
-    renderDayStage();
-    refreshCustomMapMarkers();
-  };
-  document.getElementById('pwd-modal-title').textContent='🔒 儲存行程';
-  document.getElementById('pwd-modal-desc').textContent='請輸入密碼以儲存變更';
-  document.getElementById('pwd-modal').classList.add('open');
-  document.getElementById('pwd-modal-input').value='';
-  document.getElementById('pwd-modal-err').textContent='';
-  setTimeout(()=>document.getElementById('pwd-modal-input').focus(),120);
+  const events=DAY_EVENTS[date]||[];
+  const idx=events.findIndex(e=>e.id===id);
+  if(idx>=0) Object.assign(events[idx], updated);
+  saveDayEvents(date);
+  closeEditModal();
+  renderDayStage();
+  refreshCustomMapMarkers();
 }
 
 /* swipe */
@@ -1562,7 +1496,7 @@ function renderChecklist(kind){
     <div class="check-row ${item.checked?'done':''}">
       <div class="chk" onclick="toggleItem('${kind}','${item.id}')">${item.checked?'✓':''}</div>
       <span>${item.text}</span>
-      <button class="rm" onclick="pwdGate('removeItem_wrap','${kind}|${item.id}')">✕</button>
+      <button class="rm" onclick="removeItem_wrap('${kind}|${item.id}')">✕</button>
     </div>`).join('')||'<div class="check-row"><span style="color:var(--text3)">目前沒有項目</span></div>';
 }
 function toggleItem(kind,id){
@@ -1596,6 +1530,7 @@ const DOC_SCHEMA = {
       {id:'hotline',label:'緊急救援電話',type:'text',placeholder:''},
       {id:'period',label:'保障期間',type:'text',placeholder:'2027-01-23 ~ 2027-01-27'},
       {id:'note',label:'備註',type:'textarea',placeholder:''},
+      {id:'attachUrl',label:'附件網址',type:'text',placeholder:'https://drive.google.com/…'},
     ]
   },
   visa:{
@@ -1608,6 +1543,7 @@ const DOC_SCHEMA = {
       {id:'passportExpiry',label:'護照效期',type:'text',placeholder:'YYYY-MM-DD'},
       {id:'appDate',label:'申請日期',type:'text',placeholder:''},
       {id:'note',label:'備註',type:'textarea',placeholder:'入境條件、注意事項…'},
+      {id:'attachUrl',label:'附件網址',type:'text',placeholder:'https://drive.google.com/…'},
     ]
   }
 };
@@ -1628,84 +1564,36 @@ function renderDocEntry(type,entry,idx){
     return `<div class="doc-field"><label>${f.label}</label><input type="text" data-field="${f.id}" value="${val}" onchange="updateDocField('${type}',${idx},'${f.id}',this.value)" placeholder="${f.placeholder}"></div>`;
   }).join('');
 
-  const filesHtml=renderFileList(type,idx,entry.files||[]);
+  const linkHtml = entry.attachUrl ? `<a class="doc-attach-link" href="${entry.attachUrl}" target="_blank" rel="noopener">🔗 開啟附件連結</a>` : '';
 
   return `<div class="doc-card" id="card-${type}-${idx}">
     <div class="doc-card-header">
       <div class="doc-card-name">${schema.label} #${idx+1}</div>
-      <button class="doc-card-del" onclick="pwdGate('deleteDocEntry_wrap','${type}|${idx}')" title="刪除">✕</button>
+      <button class="doc-card-del" onclick="deleteDocEntry_wrap('${type}|${idx}')" title="刪除">✕</button>
     </div>
     ${fieldsHtml}
-    <div class="doc-field"><label>上傳附件</label>
-      <div class="doc-upload-area" onclick="document.getElementById('file-${type}-${idx}').click()">
-        <input type="file" id="file-${type}-${idx}" multiple accept=".pdf,.jpg,.jpeg,.png,.gif,.webp" onchange="handleFileUpload('${type}',${idx},this)">
-        <div>📎</div>
-        <div class="doc-upload-label">點擊上傳 PDF / 圖片</div>
-      </div>
-      <div class="doc-file-list" id="files-${type}-${idx}">${filesHtml}</div>
-    </div>
+    ${linkHtml}
     <div class="doc-card-footer">
-      <button class="doc-card-save" onclick="pwdGate('saveDocEntry_wrap','${type}|${idx}')">✓ 儲存資料</button>
+      <button class="doc-card-save" onclick="saveDocEntry_wrap('${type}|${idx}')">✓ 儲存資料</button>
     </div>
   </div>`;
 }
 
 function renderCustomEntry(entry,idx){
-  const filesHtml=renderFileList('custom',idx,entry.files||[]);
+  const linkHtml = entry.attachUrl ? `<a class="doc-attach-link" href="${entry.attachUrl}" target="_blank" rel="noopener">🔗 開啟附件連結</a>` : '';
   return `<div class="doc-card" id="card-custom-${idx}">
     <div class="doc-card-header">
       <div class="doc-card-name">${entry.category||'文件 #'+(idx+1)}</div>
-      <button class="doc-card-del" onclick="pwdGate('deleteDocEntry_wrap','custom|${idx}')" title="刪除">✕</button>
+      <button class="doc-card-del" onclick="deleteDocEntry_wrap('custom|${idx}')" title="刪除">✕</button>
     </div>
     <div class="doc-field"><label>類別名稱</label><input type="text" data-field="category" value="${(entry.category||'').replace(/"/g,'&quot;')}" onchange="updateDocField('custom',${idx},'category',this.value)" placeholder="例如：飯店訂房確認"></div>
     <div class="doc-field"><label>文件內容</label><textarea rows="3" data-field="content" onchange="updateDocField('custom',${idx},'content',this.value)" placeholder="訂單號碼、聯絡資訊、備註…">${entry.content||''}</textarea></div>
-    <div class="doc-field"><label>上傳附件</label>
-      <div class="doc-upload-area" onclick="document.getElementById('file-custom-${idx}').click()">
-        <input type="file" id="file-custom-${idx}" multiple accept=".pdf,.jpg,.jpeg,.png,.gif,.webp" onchange="handleFileUpload('custom',${idx},this)">
-        <div>📎</div>
-        <div class="doc-upload-label">點擊上傳 PDF / 圖片</div>
-      </div>
-      <div class="doc-file-list" id="files-custom-${idx}">${filesHtml}</div>
-    </div>
+    <div class="doc-field"><label>附件網址</label><input type="text" data-field="attachUrl" value="${(entry.attachUrl||'').replace(/"/g,'&quot;')}" onchange="updateDocField('custom',${idx},'attachUrl',this.value)" placeholder="https://drive.google.com/…"></div>
+    ${linkHtml}
     <div class="doc-card-footer">
-      <button class="doc-card-save" onclick="pwdGate('saveDocEntry_wrap','custom|${idx}')">✓ 儲存資料</button>
+      <button class="doc-card-save" onclick="saveDocEntry_wrap('custom|${idx}')">✓ 儲存資料</button>
     </div>
   </div>`;
-}
-
-function renderFileList(type,idx,files){
-  if(!files||!files.length) return '';
-  return files.map((f,fi)=>`
-    <div class="doc-file-item">
-      <span class="doc-file-open" onclick="previewDocFileAt('${type}',${idx},${fi})" title="點選預覽">
-        <span>📄</span>
-        <span class="df-name">${f.name}</span>
-      </span>
-      <button class="doc-file-rm" onclick="pwdGate('removeDocFile_wrap','${type}|${idx}|${fi}')">✕</button>
-    </div>`).join('');
-}
-
-function previewDocFileAt(type, idx, fi){
-  const data=getDocData();
-  const f = data[type] && data[type][idx] && data[type][idx].files && data[type][idx].files[fi];
-  if(!f) return;
-  const mime = f.type || (f.dataUrl.match(/^data:([^;]+);/)||[])[1] || '';
-  const body=document.getElementById('file-preview-body');
-  if(mime.startsWith('image/')){
-    body.innerHTML = `<img src="${f.dataUrl}" alt="" style="max-width:100%;max-height:74vh;border-radius:10px;display:block;margin:0 auto;">`;
-  } else if(mime==='application/pdf'){
-    body.innerHTML = `<iframe src="${f.dataUrl}" style="width:100%;height:74vh;border:none;border-radius:10px;background:#fff;"></iframe>`;
-  } else {
-    body.innerHTML = `<div style="padding:30px 10px;text-align:center;color:var(--text3);font-size:.85rem;">此檔案類型不支援直接預覽。</div>`;
-  }
-  document.getElementById('file-preview-name').textContent = f.name;
-  document.getElementById('file-preview-download').href = f.dataUrl;
-  document.getElementById('file-preview-download').setAttribute('download', f.name);
-  document.getElementById('file-preview-modal').classList.add('open');
-}
-function closeFilePreview(){
-  document.getElementById('file-preview-modal').classList.remove('open');
-  document.getElementById('file-preview-body').innerHTML='';
 }
 
 function renderDocs(){
@@ -1722,11 +1610,11 @@ function renderDocs(){
 
 function addDocEntry(type){
   const data=getDocData();
-  data[type].push({files:[]});saveDocData(data);renderDocs();
+  data[type].push({});saveDocData(data);renderDocs();
 }
 function addDocCategory(){
   const data=getDocData();
-  data.custom.push({category:'',content:'',files:[]});saveDocData(data);renderDocs();
+  data.custom.push({category:'',content:'',attachUrl:''});saveDocData(data);renderDocs();
 }
 window.addDocCategory=addDocCategory;
 
@@ -1741,30 +1629,6 @@ function deleteDocEntry(type,idx){
   data[type].splice(idx,1);saveDocData(data);renderDocs();
 }
 window.deleteDocEntry_wrap=function(arg){const[t,i]=arg.split('|');deleteDocEntry(t,+i);};
-
-function handleFileUpload(type,idx,input){
-  const data=getDocData();
-  if(!data[type][idx]) return;
-  if(!data[type][idx].files) data[type][idx].files=[];
-  const files=Array.from(input.files);
-  let loaded=0;
-  files.forEach(f=>{
-    const reader=new FileReader();
-    reader.onload=e=>{
-      data[type][idx].files.push({name:f.name,size:f.size,type:f.type,dataUrl:e.target.result});
-      loaded++;
-      if(loaded===files.length){saveDocData(data);renderDocs();showToast('已上傳 '+files.length+' 個檔案 ✓');}
-    };
-    reader.readAsDataURL(f);
-  });
-  input.value='';
-}
-
-function removeDocFile(type,idx,fi){
-  const data=getDocData();
-  if(data[type][idx]&&data[type][idx].files) data[type][idx].files.splice(fi,1);
-  saveDocData(data);renderDocs();
-}
 
 function saveDocEntry(type,idx){
   const card=document.getElementById('card-'+type+'-'+idx);
@@ -1789,7 +1653,6 @@ function showToast(msg){
   clearTimeout(t._timer);
   t._timer=setTimeout(()=>t.classList.remove('show'),1800);
 }
-window.removeDocFile_wrap=function(arg){const[t,i,fi]=arg.split('|');removeDocFile(t,+i,+fi);};
 
 /* ═══════════════════════════════════════
    MAP
