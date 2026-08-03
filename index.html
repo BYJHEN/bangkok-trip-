@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>2027 曼谷FBG旅遊 | BKK FBG TRIP</title>
-<meta name="theme-color" content="#405463">
+<meta name="theme-color" content="#1F3A34">
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -19,28 +19,28 @@
 <style>
 /* ── DESIGN TOKENS ── */
 :root{
-  --bg:       #F7F5F1;
-  --bg2:      #EFECE6;
-  --bg3:      #E5E1D8;
-  --card:     #FFFFFF;
-  --card2:    #FAFAF8;
-  --primary:  #405463;
-  --primary-d:#2E3D4A;
-  --secondary:#7B99A5;
-  --accent-a: #A87B4C;
+  --bg:       #F8F3E7;
+  --bg2:      #F1E9D5;
+  --bg3:      #E8DEC3;
+  --card:     #FFFEFA;
+  --card2:    #FBF7EC;
+  --primary:  #6E8570;
+  --primary-d:#1F3A34;
+  --secondary:#9CAF97;
+  --accent-a: #B8874A;
   --accent-b: #8A5A6A;
-  --div:      #D8D8D8;
-  --text:     #1C2A33;
-  --text2:    #405463;
-  --text3:    #7B8FA0;
-  --success:  #4A7C59;
-  --warn:     #A87B4C;
-  --danger:   #8A5A6A;
-  --r:        22px;
-  --r-sm:     14px;
-  --r-xs:     10px;
-  --shadow:   0 2px 20px rgba(64,84,99,.10);
-  --shadow-sm:0 1px 8px rgba(64,84,99,.07);
+  --div:      #E5DBC1;
+  --text:     #2C2A22;
+  --text2:    #55524A;
+  --text3:    #8C8674;
+  --success:  #5C8A5C;
+  --warn:     #B8874A;
+  --danger:   #A85C5C;
+  --r:        26px;
+  --r-sm:     18px;
+  --r-xs:     12px;
+  --shadow:   0 10px 32px rgba(90,74,40,.11);
+  --shadow-sm:0 3px 14px rgba(90,74,40,.08);
   --lh:       1.55;
   --font-head:'Noto Serif TC','Noto Sans TC',serif;
   --font-body:'Noto Sans TC','PingFang TC',sans-serif;
@@ -69,6 +69,12 @@ a{color:inherit;text-decoration:none}
 button{font-family:var(--font-body);cursor:pointer}
 input,textarea,select{font-family:var(--font-body)}
 ::selection{background:var(--primary);color:#fff}
+
+/* ── AMBIENT PALM SHADOW OVERLAY ── */
+.palm-overlay{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+.palm-frond{position:absolute;opacity:.06;}
+.palm-tl{top:-40px;left:-40px;width:220px;height:220px;transform:rotate(-8deg);}
+.palm-br{bottom:-30px;right:-50px;width:260px;height:260px;transform:rotate(6deg);}
 
 /* ── LOCK SCREEN ── */
 #lock-screen{
@@ -143,13 +149,13 @@ input,textarea,select{font-family:var(--font-body)}
 }
 
 /* ── APP SHELL ── */
-#app{max-width:540px;margin:0 auto;min-height:100%;position:relative;display:none}
+#app{max-width:540px;margin:0 auto;min-height:100%;position:relative;z-index:1;display:none}
 #app.visible{display:block}
 
 /* ── TAB BAR ── */
 .tabbar-wrap{
   position:sticky;top:0;z-index:30;
-  background:rgba(247,245,241,.96);backdrop-filter:blur(12px);
+  background:rgba(248,243,231,.96);backdrop-filter:blur(12px);
   border-bottom:1px solid var(--div);
 }
 .brand-row{
@@ -207,42 +213,67 @@ input,textarea,select{font-family:var(--font-body)}
 
 /* ── HOME ── */
 .home-eyebrow{
-  font-family:var(--font-en);font-style:italic;font-size:.85rem;
-  color:var(--accent-a);letter-spacing:.08em;margin-bottom:6px;
+  font-family:var(--font-en);font-style:italic;font-size:.92rem;
+  color:var(--accent-a);letter-spacing:.1em;margin-bottom:10px;
+  position:relative;padding-bottom:12px;
+}
+.hero-title-block{position:relative;overflow:hidden;}
+.hero-watermark{
+  position:absolute;top:-10px;right:-20px;width:78%;height:130%;
+  z-index:0;pointer-events:none;
+}
+.home-eyebrow,.home-h1,.home-meta{position:relative;z-index:1;}
+.home-eyebrow::after{
+  content:'';position:absolute;left:0;bottom:0;width:34px;height:2px;
+  background:var(--accent-a);opacity:.6;
 }
 .home-h1{
   font-family:var(--font-head);font-weight:700;
-  font-size:clamp(1.4rem,5vw,1.9rem);color:var(--text);
-  line-height:1.2;margin-bottom:6px;
+  font-size:clamp(1.6rem,6vw,2.3rem);color:var(--text);
+  line-height:1.25;margin-bottom:8px;letter-spacing:.01em;
 }
-.home-meta{font-size:.78rem;color:var(--text3);letter-spacing:.04em;margin-bottom:20px}
+.home-meta{font-size:.78rem;color:var(--text3);letter-spacing:.04em;margin-bottom:22px}
 
-/* departure board */
+/* departure board — illustrated hero */
 .board{
-  background:var(--primary-d);border-radius:var(--r);
+  border-radius:var(--r);
   padding:20px;margin-bottom:20px;overflow:hidden;position:relative;
+  min-height:230px;display:flex;flex-direction:column;justify-content:flex-end;
+  box-shadow:var(--shadow);border:1.5px solid rgba(184,135,74,.45);
 }
-.board::after{
-  content:'';position:absolute;
-  right:-30px;top:-30px;width:140px;height:140px;
-  border-radius:50%;background:rgba(255,255,255,.03);
+.board-art{
+  position:absolute;inset:0;width:100%;height:100%;
+  z-index:0;
+}
+.board-scrim{
+  position:absolute;inset:0;z-index:1;
+  background:linear-gradient(180deg, rgba(15,25,20,.3) 0%, rgba(15,25,20,0) 30%, rgba(15,25,20,.12) 70%, rgba(15,25,20,.4) 100%);
 }
 .board-top{
-  display:flex;justify-content:space-between;align-items:center;
+  position:relative;z-index:2;
+  display:flex;justify-content:space-between;align-items:flex-start;
   font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;
-  color:rgba(255,255,255,.35);margin-bottom:14px;
+  color:rgba(255,255,255,.75);margin-bottom:14px;
+  text-shadow:0 1px 4px rgba(0,0,0,.3);
 }
-.board-status{color:rgba(168,123,76,.9);font-weight:700}
-.flap-row{display:flex;gap:10px;align-items:flex-end;justify-content:center}
+.board-status-label{
+  font-family:var(--font-head);font-size:.82rem;letter-spacing:.06em;
+  color:#F3E2BC;font-weight:600;text-transform:none;position:relative;padding-bottom:8px;
+}
+.board-status-label::after{
+  content:'';position:absolute;right:0;bottom:0;width:26px;height:1.5px;
+  background:#E9C687;opacity:.7;
+}
+.flap-row{position:relative;z-index:2;display:flex;gap:10px;align-items:flex-end;justify-content:flex-end}
 .flap{
-  background:rgba(0,0,0,.25);border-radius:10px;padding:8px 12px 6px;
-  min-width:70px;text-align:center;border:1px solid rgba(255,255,255,.08);
+  background:rgba(15,25,20,.55);backdrop-filter:blur(3px);border-radius:16px;padding:10px 14px 8px;
+  min-width:70px;text-align:center;border:1.5px solid rgba(233,198,135,.4);
 }
 .flap .v{
   font-family:var(--font-num);font-size:clamp(1.6rem,7vw,2.4rem);
-  font-weight:700;color:#E8D8B8;letter-spacing:-.01em;
+  font-weight:700;color:#F3E2BC;letter-spacing:-.01em;
 }
-.flap .l{font-size:.6rem;color:rgba(255,255,255,.3);letter-spacing:.1em;margin-top:2px}
+.flap .l{font-size:.58rem;color:#E9C687;letter-spacing:.1em;margin-top:3px;opacity:.85}
 
 .quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px}
 .q-card{
@@ -267,7 +298,7 @@ input,textarea,select{font-family:var(--font-body)}
 /* ── CARDS / GENERIC ── */
 .card{
   background:var(--card);border:1px solid var(--div);
-  border-radius:var(--r);padding:18px;box-shadow:var(--shadow-sm);
+  border-radius:var(--r);padding:20px;box-shadow:var(--shadow-sm);
 }
 .divider{height:1px;background:var(--div);margin:16px 0}
 .section-label{
@@ -533,7 +564,7 @@ input,textarea,select{font-family:var(--font-body)}
 .fc-lo{font-family:var(--font-num);font-size:.75rem;color:var(--text3)}
 .fc-rain{font-size:.67rem;color:var(--primary);margin-top:3px;font-weight:600}
 .note-box{
-  background:rgba(64,84,99,.06);border:1px solid rgba(64,84,99,.12);
+  background:rgba(110,133,112,.08);border:1px solid rgba(110,133,112,.15);
   border-radius:var(--r-xs);padding:12px 14px;font-size:.8rem;
   color:var(--text2);margin-top:12px;line-height:1.6;
 }
@@ -816,6 +847,25 @@ input,textarea,select{font-family:var(--font-body)}
 </head>
 <body>
 
+<!-- ═══════════════════════════ AMBIENT PALM SHADOW OVERLAY ═══════════════════════════ -->
+<div class="palm-overlay" aria-hidden="true">
+  <svg class="palm-frond palm-tl" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+    <g fill="var(--primary-d)">
+      <path d="M0 0 C40 10 70 40 85 90 C60 75 40 55 25 30 C18 45 20 65 30 85 C10 65 0 35 0 0 Z"/>
+      <path d="M0 0 C55 5 95 30 120 75 C90 65 65 45 45 20 C42 40 48 62 62 82 C35 65 15 35 0 0 Z" opacity=".7"/>
+      <path d="M0 0 C60 -8 110 8 145 45 C112 42 82 30 55 8 C58 28 70 46 90 60 C55 52 22 30 0 0 Z" opacity=".5"/>
+      <path d="M0 0 C35 25 55 60 58 105 C40 85 28 60 22 32 C12 50 10 72 16 95 C-2 70 -6 35 0 0 Z" opacity=".85"/>
+    </g>
+  </svg>
+  <svg class="palm-frond palm-br" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+    <g fill="var(--primary-d)">
+      <path d="M300 300 C260 290 230 260 215 210 C240 225 260 245 275 270 C282 255 280 235 270 215 C290 235 300 265 300 300 Z"/>
+      <path d="M300 300 C245 295 205 270 180 225 C210 235 235 255 255 280 C258 260 252 238 238 218 C265 235 285 265 300 300 Z" opacity=".7"/>
+      <path d="M300 300 C240 308 190 292 155 255 C188 258 218 270 245 292 C242 272 230 254 210 240 C245 248 278 270 300 300 Z" opacity=".5"/>
+    </g>
+  </svg>
+</div>
+
 <!-- lock screen removed: app opens directly -->
 
 <!-- ═══════════════════════════ PWD MODAL ═══════════════════════════ -->
@@ -1012,19 +1062,159 @@ input,textarea,select{font-family:var(--font-body)}
 
   <!-- ═══════ HOME ═══════ -->
   <section id="view-home" class="view active">
-    <div class="home-eyebrow">FBG Trip · Bangkok, Thailand</div>
-    <h1 class="home-h1">2027 曼谷<br>FBG 旅遊計畫</h1>
-    <div class="home-meta">01.23（六）— 01.27（三）· 五天四夜 · SYW · ZYW · JJ</div>
+    <div class="hero-title-block">
+      <svg class="hero-watermark" viewBox="0 0 600 260" preserveAspectRatio="xMaxYMid meet" xmlns="http://www.w3.org/2000/svg">
+        <g fill="none" stroke="#B8874A" stroke-width="1.2" opacity=".28">
+          <path d="M300 230 L300 150 L288 150 L288 132 L312 132 L312 150 L300 150"/>
+          <path d="M270 150 L330 150 L322 122 L278 122 Z"/>
+          <path d="M278 122 L322 122 L315 98 L285 98 Z"/>
+          <path d="M285 98 L315 98 L308 76 L292 76 Z"/>
+          <line x1="300" y1="60" x2="300" y2="76"/>
+          <circle cx="300" cy="56" r="3"/>
+          <path d="M380 230 L380 175 L372 175 L372 160 L396 160 L396 175 L388 175 L388 230"/>
+          <path d="M360 160 L408 160 L400 140 L368 140 Z"/>
+          <path d="M368 140 L400 140 L392 122 L376 122 Z"/>
+          <path d="M440 230 L440 190 L432 190 L448 168 L464 190 L456 190 L456 230"/>
+          <circle cx="448" cy="160" r="3"/>
+          <path d="M200 230 L200 195 L192 195 L208 172 L224 195 L216 195 L216 230"/>
+          <circle cx="208" cy="165" r="2.6"/>
+          <path d="M500 230 L500 200 L494 200 L510 180 L526 200 L520 200 L520 230"/>
+          <circle cx="510" cy="174" r="2.6"/>
+          <line x1="140" y1="230" x2="600" y2="230"/>
+          <path d="M330 218 C345 213 360 213 375 218" opacity=".6"/>
+          <path d="M420 222 C432 218 444 218 456 222" opacity=".6"/>
+        </g>
+        <g fill="#B8874A" opacity=".22">
+          <path d="M560 40 C550 55 552 72 562 84 C556 68 558 52 568 38 C572 54 568 70 578 82 C582 64 578 44 566 30 C572 46 566 60 560 40 Z"/>
+        </g>
+        <g fill="none" stroke="#B8874A" stroke-width="1" opacity=".3">
+          <path d="M60 40 C68 44 74 50 76 58"/>
+          <path d="M52 46 C60 50 66 56 68 64"/>
+          <path d="M100 55 C108 59 114 65 116 73"/>
+          <path d="M92 61 C100 65 106 71 108 79"/>
+        </g>
+      </svg>
+      <div class="home-eyebrow">FBG Trip · Bangkok, Thailand</div>
+      <h1 class="home-h1">2027 曼谷<br>FBG 旅遊計畫</h1>
+      <div class="home-meta">01.23（六）— 01.27（三）· 五天四夜 · SYW · ZYW · JJ</div>
+    </div>
 
     <div class="board" id="board">
+      <svg class="board-art" viewBox="0 0 600 260" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="skyBase" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#2A2318"/>
+            <stop offset="45%" stop-color="#1E332E"/>
+            <stop offset="100%" stop-color="#152925"/>
+          </linearGradient>
+          <radialGradient id="sunsetGlow" cx="18%" cy="78%" r="65%">
+            <stop offset="0%" stop-color="#E8B583" stop-opacity=".65"/>
+            <stop offset="45%" stop-color="#C98B5A" stop-opacity=".25"/>
+            <stop offset="100%" stop-color="#C98B5A" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="sunGlow2" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#F3DBA8" stop-opacity=".8"/>
+            <stop offset="100%" stop-color="#F3DBA8" stop-opacity="0"/>
+          </radialGradient>
+          <linearGradient id="riverGrad2" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#12211D"/>
+            <stop offset="100%" stop-color="#1B2E29"/>
+          </linearGradient>
+        </defs>
+
+        <rect width="600" height="260" fill="url(#skyBase)"/>
+        <rect width="600" height="260" fill="url(#sunsetGlow)"/>
+        <circle cx="118" cy="80" r="46" fill="url(#sunGlow2)"/>
+        <circle cx="118" cy="80" r="15" fill="#F3DBA8" opacity=".9"/>
+
+        <!-- sparkle stars -->
+        <g fill="#E9C687" opacity=".7">
+          <path d="M420 40 l2.4 6 6 2.4 -6 2.4 -2.4 6 -2.4-6 -6-2.4 6-2.4 Z"/>
+          <path d="M480 75 l1.8 4.5 4.5 1.8 -4.5 1.8 -1.8 4.5 -1.8-4.5 -4.5-1.8 4.5-1.8 Z"/>
+          <path d="M340 30 l1.6 4 4 1.6 -4 1.6 -1.6 4 -1.6-4 -4-1.6 4-1.6 Z" opacity=".8"/>
+        </g>
+        <!-- birds -->
+        <g stroke="#E9C687" stroke-width="1.3" fill="none" opacity=".55" stroke-linecap="round">
+          <path d="M260 32 q6 -7 12 0 q6 -7 12 0"/>
+          <path d="M292 46 q5 -6 10 0 q5 -6 10 0"/>
+        </g>
+
+        <!-- distant skyline -->
+        <g fill="#132723" opacity=".85">
+          <rect x="0" y="165" width="12" height="60"/>
+          <rect x="16" y="145" width="9" height="80"/>
+          <polygon points="40,225 40,192 51,178 62,192 62,225"/>
+          <rect x="225" y="175" width="10" height="50"/>
+          <rect x="240" y="190" width="14" height="35"/>
+        </g>
+        <!-- side stupas -->
+        <g fill="#0F231D">
+          <path d="M52 225 L52 178 L45 178 L60 155 L75 178 L68 178 L68 225 Z"/>
+          <circle cx="60" cy="148" r="3.6"/>
+          <path d="M205 225 L205 185 L198 185 L212 165 L226 185 L219 185 L219 225 Z"/>
+          <circle cx="212" cy="158" r="3.4"/>
+        </g>
+        <!-- central Wat Arun prang, richly tiered -->
+        <g fill="#0B1D17">
+          <path d="M140 225 L140 172 L128 172 L128 152 L152 152 L152 172 L140 172"/>
+          <rect x="128" y="152" width="24" height="7"/>
+          <path d="M112 172 L168 172 L160 145 L120 145 Z"/>
+          <path d="M120 145 L160 145 L153 122 L127 122 Z"/>
+          <path d="M127 122 L153 122 L147 102 L133 102 Z"/>
+          <path d="M133 102 L147 102 L143 84 L137 84 Z"/>
+          <rect x="138.5" y="66" width="3" height="18"/>
+          <circle cx="140" cy="63" r="3.4"/>
+          <!-- flanking lower shrines -->
+          <path d="M90 225 L90 190 L82 190 L82 178 L100 178 L100 190 L92 190 L92 225" opacity=".92"/>
+          <path d="M180 225 L180 195 L173 195 L173 184 L189 184 L189 195 L182 195 L182 225" opacity=".92"/>
+        </g>
+        <g stroke="#E9C687" stroke-width="1" opacity=".4" fill="none">
+          <path d="M112 172 L168 172 L160 145 L120 145 Z"/>
+          <path d="M120 145 L160 145 L153 122 L127 122 Z"/>
+          <path d="M127 122 L153 122 L147 102 L133 102 Z"/>
+        </g>
+
+        <!-- river with warm reflection -->
+        <rect x="0" y="203" width="600" height="57" fill="url(#riverGrad2)"/>
+        <g stroke="#E9C687" stroke-opacity=".4" stroke-width="2" stroke-linecap="round">
+          <line x1="95" y1="214" x2="135" y2="214"/>
+          <line x1="70" y1="226" x2="120" y2="226"/>
+          <line x1="105" y1="238" x2="150" y2="238"/>
+          <line x1="80" y1="248" x2="115" y2="248"/>
+        </g>
+        <!-- long-tail boat with tiny figure -->
+        <g fill="#0B1D17">
+          <path d="M40 232 C50 227 68 227 80 232 L76 242 L44 242 Z"/>
+          <line x1="78" y1="232" x2="102" y2="216" stroke="#0B1D17" stroke-width="2.2" stroke-linecap="round"/>
+          <circle cx="58" cy="224" r="4"/>
+          <rect x="55" y="227" width="6" height="7" rx="1.5"/>
+        </g>
+
+        <!-- palm fronds reaching in from the right edge -->
+        <g fill="#0B1D17" opacity=".92">
+          <path d="M600 40 C560 48 528 70 508 105 C536 95 560 78 578 55 C558 78 548 105 552 135 C575 105 592 70 600 40 Z"/>
+          <path d="M600 55 C568 68 542 92 528 125 C552 112 572 92 585 68 C570 92 564 118 572 145 C590 115 600 85 600 55 Z" opacity=".75"/>
+        </g>
+        <g fill="#0B1D17" opacity=".9">
+          <path d="M600 260 C555 250 518 222 500 180 C528 195 552 215 570 240 C566 218 552 198 532 182 C562 195 588 222 600 260 Z"/>
+        </g>
+        <!-- gold decorative swoosh -->
+        <path d="M470 250 C500 244 530 246 555 236" stroke="#E9C687" stroke-width="1.2" fill="none" opacity=".45" stroke-linecap="round"/>
+
+        <!-- foreground palm frond silhouette (bottom-left) -->
+        <g fill="#0B1D17" opacity=".9">
+          <path d="M0 260 C30 240 55 210 65 172 C42 187 25 207 15 232 C10 207 15 182 30 160 C5 177 -8 207 -10 240 Z"/>
+        </g>
+      </svg>
+      <div class="board-scrim"></div>
       <div class="board-top">
         <span class="en">TPE ⇄ BKK · Suvarnabhumi</span>
-        <span class="board-status num" id="boardStatus">Loading</span>
+        <span class="board-status-label" id="boardStatus">倒數出發</span>
       </div>
       <div class="flap-row" id="flapRow">
-        <div class="flap"><div class="v" id="flapD">--</div><div class="l">DAYS</div></div>
-        <div class="flap"><div class="v" id="flapH">--</div><div class="l">HRS</div></div>
-        <div class="flap"><div class="v" id="flapM">--</div><div class="l">MIN</div></div>
+        <div class="flap"><div class="v" id="flapD">--</div><div class="l">✦ DAYS</div></div>
+        <div class="flap"><div class="v" id="flapH">--</div><div class="l">✦ HRS</div></div>
+        <div class="flap"><div class="v" id="flapM">--</div><div class="l">✦ MIN</div></div>
       </div>
     </div>
 
@@ -2106,7 +2296,7 @@ function refreshCustomMapMarkers(){
   getCustomMapPoints().forEach(p=>{
     const gm = p.url || ('https://www.google.com/maps/dir/?api=1&destination='+p.lat+','+p.lng);
     const icon=L.divIcon({html:'<div style="font-size:22px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))">📍</div>',className:'',iconSize:[26,26],iconAnchor:[13,13]});
-    L.marker([p.lat,p.lng],{icon}).bindPopup(`<b style="font-size:.9rem">${p.name}</b><br><span style="font-size:.78rem;color:#666">${p.note}</span><br><a style="display:inline-block;margin-top:6px;padding:5px 11px;background:#405463;color:#fff;border-radius:7px;font-size:.73rem;font-weight:600;text-decoration:none" href="${gm}" target="_blank" rel="noopener">Google Maps →</a>`).addTo(customLayerGroup);
+    L.marker([p.lat,p.lng],{icon}).bindPopup(`<b style="font-size:.9rem">${p.name}</b><br><span style="font-size:.78rem;color:#666">${p.note}</span><br><a style="display:inline-block;margin-top:6px;padding:5px 11px;background:#6E8570;color:#fff;border-radius:7px;font-size:.73rem;font-weight:600;text-decoration:none" href="${gm}" target="_blank" rel="noopener">Google Maps →</a>`).addTo(customLayerGroup);
   });
 }
 function initMap(){
@@ -2119,7 +2309,7 @@ function initMap(){
   POIS.forEach(p=>{
     const icon=L.divIcon({html:'<div style="font-size:22px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))">'+p.ic+'</div>',className:'',iconSize:[26,26],iconAnchor:[13,13]});
     const gm=p.url||('https://www.google.com/maps/dir/?api=1&destination='+p.lat+','+p.lng);
-    L.marker([p.lat,p.lng],{icon}).bindPopup(`<b style="font-size:.9rem">${p.name}</b><br><span style="font-size:.78rem;color:#666">${p.note}</span><br><a style="display:inline-block;margin-top:6px;padding:5px 11px;background:#405463;color:#fff;border-radius:7px;font-size:.73rem;font-weight:600;text-decoration:none" href="${gm}" target="_blank" rel="noopener">Google Maps →</a>`).addTo(groups[p.cat]);
+    L.marker([p.lat,p.lng],{icon}).bindPopup(`<b style="font-size:.9rem">${p.name}</b><br><span style="font-size:.78rem;color:#666">${p.note}</span><br><a style="display:inline-block;margin-top:6px;padding:5px 11px;background:#6E8570;color:#fff;border-radius:7px;font-size:.73rem;font-weight:600;text-decoration:none" href="${gm}" target="_blank" rel="noopener">Google Maps →</a>`).addTo(groups[p.cat]);
   });
   const overlays={};Object.keys(groups).forEach(k=>{groups[k].addTo(map);overlays[labels[k]]=groups[k];});
   L.control.layers(null,overlays,{collapsed:false}).addTo(map);
