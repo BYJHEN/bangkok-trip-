@@ -843,6 +843,64 @@ input,textarea,select{font-family:var(--font-body)}
 }
 @keyframes spin{to{transform:rotate(360deg)}}
 .muted{font-size:.7rem;color:var(--text3);text-align:right;margin-top:8px}
+
+/* APPROVED IMAGE BACKGROUND TEST — only homepage hero + countdown board */
+#view-home{padding-top:14px;}
+.hero-title-block{
+  position:relative;overflow:hidden;
+  width:100%;aspect-ratio:1448 / 400;
+  min-height:0;padding:0;margin:0 0 14px;
+  border-radius:0;
+  background:url('./bangkok_hero_exact.png') center center / 100% 100% no-repeat;
+}
+.hero-title-block .hero-watermark,
+.hero-title-block .home-eyebrow,
+.hero-title-block .home-h1,
+.hero-title-block .home-meta{opacity:0;pointer-events:none;}
+.board{
+  width:100%;aspect-ratio:1300 / 406;min-height:0;
+  padding:0;margin-bottom:20px;border-radius:26px;
+  background:url('./bangkok_board_exact.png') center center / 100% 100% no-repeat;
+  border:none;box-shadow:0 10px 28px rgba(58,72,77,.18);
+  position:relative;overflow:hidden;display:block;
+}
+.board-art,.board-scrim,.board-top{display:none!important;}
+.flap-row{
+  /* pixel-measured against bangkok_board_exact.png (1300×406) so the
+     three number slots line up exactly with the dark gold-framed boxes
+     baked into the art, instead of an approximated guess */
+  position:absolute;z-index:3;
+  left:27.31%;right:20.46%;top:27.09%;bottom:8.62%;
+  display:grid;grid-template-columns:repeat(3,1fr);gap:1%;
+  padding:0;align-items:center;justify-content:stretch;
+}
+.flap{
+  min-width:0;padding:0 3%;border:0;border-radius:0;background:transparent;box-shadow:none;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+.flap .v{
+  font-family:var(--font-head);font-weight:600;
+  font-size:clamp(1.5rem,6.4vw,2.6rem);line-height:1;
+  color:#FFF1D8;letter-spacing:-.04em;
+  text-shadow:0 1px 0 rgba(255,255,255,.12);
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;max-width:100%;
+}
+/* 3-digit (or more) counts — e.g. 100+ days out — need to shrink so the
+   number stays inside the gold-framed flap and doesn't spill over the art */
+.flap .v.d3{
+  font-size:clamp(1.08rem,4.8vw,1.9rem);
+  letter-spacing:-.06em;
+}
+.flap .l{display:none;}
+@media(max-width:480px){
+  /* same box position as desktop (image is a fixed-aspect background,
+     so the percentages don't change) — only the font shrinks a touch */
+  .flap .v{font-size:clamp(1.36rem,5.8vw,2.35rem);}
+  .flap .v.d3{font-size:clamp(1rem,4.3vw,1.7rem);}
+}
+
 </style>
 </head>
 <body>
@@ -1785,6 +1843,15 @@ function updateBoardAndStatus(){
   else{phase='after';diffTarget=null;badgeText='旅程已結束';statusText='期待下一次全家出遊 💛';}
 
   const setT=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  // Countdown flap numbers: also toggles a "d3" class once the value hits
+  // 3+ digits (e.g. 100+ days out) so the font shrinks and stays inside
+  // the gold-framed flap instead of overflowing the board art.
+  const setFlap=(id,v)=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    el.textContent=v;
+    el.classList.toggle('d3', String(v).replace(/[^0-9]/g,'').length>=3);
+  };
   setT('boardStatus',phase==='after'?'感謝回顧':(phase==='during'?'旅程進行中':'倒數出發'));
   setT('tripBadge',badgeText);
   setT('tripStatusText',statusText);
@@ -1792,12 +1859,12 @@ function updateBoardAndStatus(){
   if(diffTarget){
     const diff=Math.max(0,diffTarget-now);
     const d=Math.floor(diff/86400000),h=Math.floor(diff%86400000/3600000),m=Math.floor(diff%3600000/60000);
-    setT('flapD',String(d).padStart(2,'0'));
-    setT('flapH',String(h).padStart(2,'0'));
-    setT('flapM',String(m).padStart(2,'0'));
+    setFlap('flapD',String(d).padStart(2,'0'));
+    setFlap('flapH',String(h).padStart(2,'0'));
+    setFlap('flapM',String(m).padStart(2,'0'));
     setT('tripCountdownMini',(phase==='before'?'距出發 ':'距返程 ')+d+' 天 '+h+' 時');
   } else {
-    ['flapD','flapH','flapM'].forEach(id=>setT(id,'--'));
+    ['flapD','flapH','flapM'].forEach(id=>setFlap(id,'--'));
     setT('tripCountdownMini','');
   }
 }
