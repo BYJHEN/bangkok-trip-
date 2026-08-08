@@ -208,6 +208,15 @@ input,textarea,select{font-family:var(--font-body)}
 .view{display:none;padding:20px 20px 80px;min-height:60vh}
 .view.active{display:block}
 .page-head{margin-bottom:20px}
+.page-head-row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+.itin-edit-toggle{
+  flex-shrink:0;border:1.5px solid var(--primary);background:transparent;color:var(--primary);
+  border-radius:999px;padding:8px 14px;font-size:.76rem;font-weight:700;cursor:pointer;
+  white-space:nowrap;
+}
+.itin-edit-toggle.active{background:var(--primary);color:#fff;}
+.ev-edit{display:none;}
+.day-card.edit-mode .ev-edit{display:block;}
 .page-head h2{font-size:1.2rem}
 .page-head .sub{font-size:.75rem;color:var(--text3);margin-top:4px;letter-spacing:.04em}
 
@@ -1245,7 +1254,12 @@ input,textarea,select{font-family:var(--font-body)}
 
   <!-- ═══════ ITINERARY ═══════ -->
   <section id="view-itinerary" class="view">
-    <div class="page-head"><h2>每日行程</h2><div class="sub">左右切換每天 · 可新增行程</div></div>
+    <div class="page-head">
+      <div class="page-head-row">
+        <div><h2>每日行程</h2><div class="sub">左右滑動或點日期切換，今天會自動反白</div></div>
+        <button class="itin-edit-toggle" id="itinEditToggle" onclick="toggleItinEditMode()">✏️ 編輯行程</button>
+      </div>
+    </div>
     <div class="status-strip">
       <div><span class="badge" id="tripBadge">—</span><span id="tripStatusText" style="margin-left:8px;font-size:.8rem;color:var(--text3)"></span></div>
       <div class="num" id="tripCountdownMini" style="font-size:.82rem;font-weight:600;color:var(--accent-a)"></div>
@@ -1858,6 +1872,17 @@ function evStartMinutes(t){
   if(!m) return 99999;
   return (+m[1])*60 + (+m[2]);
 }
+let itinEditMode=false;
+function toggleItinEditMode(){
+  itinEditMode=!itinEditMode;
+  const btn=document.getElementById('itinEditToggle');
+  if(btn){
+    btn.textContent=itinEditMode?'✓ 完成編輯':'✏️ 編輯行程';
+    btn.classList.toggle('active',itinEditMode);
+  }
+  renderDayStage();
+}
+
 function renderDayStage(){
   const stage=document.getElementById('dayStage');
   const t=todayStr(),now=new Date(),day=DAYS[currentDayIndex];
@@ -1890,7 +1915,7 @@ function renderDayStage(){
     </div>`;
   }).join('')||'<div class="ev-dd" style="padding-left:4px;font-size:.85rem;color:var(--text3)">這天還沒有行程，新增第一個吧！</div>';
 
-  const addF=`<div class="add-ev">
+  const addF=!itinEditMode?'':`<div class="add-ev">
     <div class="add-ev-h">＋ 新增行程</div>
     <div class="add-ev-row">
       <input id="newEvTime" placeholder="時間 19:00–20:30" style="flex:1.4">
@@ -1922,7 +1947,7 @@ function renderDayStage(){
     <button class="add-ev-btn" onclick="addDayEvent('${day.date}')">新增行程</button>
   </div>`;
 
-  stage.innerHTML=`<div class="day-card ${isToday?'today':''}">
+  stage.innerHTML=`<div class="day-card ${isToday?'today':''} ${itinEditMode?'edit-mode':''}">
     <div class="day-accent ${day.band}"></div>
     <div class="day-body">
       <div class="day-num-en">${day.wd} · ${day.date}</div>
