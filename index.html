@@ -376,7 +376,7 @@ input,textarea,select{font-family:var(--font-body)}
 }
 
 /* timeline */
-.timeline{position:relative;padding-left:22px}
+.timeline{position:relative;padding-left:22px;max-height:52vh;overflow-y:auto;padding-right:2px;}
 .timeline::before{
   content:"";position:absolute;left:5px;top:4px;bottom:4px;
   width:1px;background:var(--div);
@@ -444,14 +444,19 @@ input,textarea,select{font-family:var(--font-body)}
 
 /* ── MAP ── */
 #leaflet-map{
-  width:100%;height:min(58vh,460px);border-radius:var(--r);
+  width:100%;height:min(50vh,400px);border-radius:var(--r);
   overflow:hidden;border:1px solid var(--div);box-shadow:var(--shadow-sm);
 }
-.map-legend{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0}
-.map-legend span{
-  font-size:.72rem;background:var(--card);border:1px solid var(--div);
-  padding:5px 10px;border-radius:999px;color:var(--text2);
+.day-map-section{margin-top:22px;}
+.day-map-title{font-family:var(--font-head);font-size:1.02rem;font-weight:700;color:var(--text);margin-bottom:3px;}
+.day-map-sub{font-size:.75rem;color:var(--text3);margin-bottom:12px;}
+.map-chip-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+.map-chip{
+  border:1.5px solid var(--div);background:var(--card);color:var(--text2);
+  border-radius:999px;padding:7px 14px;font-size:.74rem;font-weight:600;cursor:pointer;
 }
+.map-chip.active{background:var(--primary);border-color:var(--primary);color:#fff;}
+.ev-locate-btn{background:var(--accent-a)!important;}
 
 /* ── LISTS ── */
 .subtabs{display:flex;gap:8px;margin-bottom:16px}
@@ -1092,7 +1097,6 @@ input,textarea,select{font-family:var(--font-body)}
       <button class="tab-btn" data-tab="home"      onclick="go('home')"><span class="tab-icon">🏠</span>首頁</button>
       <button class="tab-btn" data-tab="tips"      onclick="go('tips')"><span class="tab-icon">💡</span>提醒</button>
       <button class="tab-btn" data-tab="itinerary" onclick="go('itinerary')"><span class="tab-icon">🗓️</span>行程</button>
-      <button class="tab-btn" data-tab="map"       onclick="go('map')"><span class="tab-icon">🗺️</span>地圖</button>
       <button class="tab-btn" data-tab="ledger"    onclick="go('ledger')"><span class="tab-icon">💰</span>記帳</button>
       <button class="tab-btn" data-tab="wishlist"  onclick="go('wishlist')"><span class="tab-icon">🛍️</span>願望</button>
       <button class="tab-btn" data-tab="packing"   onclick="go('packing')"><span class="tab-icon">🧳</span>行李</button>
@@ -1303,17 +1307,21 @@ input,textarea,select{font-family:var(--font-body)}
     </div>
     <div id="dayStage"></div>
     <div class="footer-note">🟢 漸層色帶＝住宿相鐵 GRAND FRESA；🟠 暖色帶＝搭機日<br>滑動或點左右箭頭切換 Day 1–5</div>
-  </section>
 
-  <!-- ═══════ MAP ═══════ -->
-  <section id="view-map" class="view">
-    <div class="page-head"><h2>地圖導航</h2><div class="sub">飯店 · 景點 · 餐廳 · 分圖層</div></div>
-    <div id="leaflet-map"></div>
-    <div class="map-legend">
-      <span>🏨 飯店</span><span>✈️ 交通</span><span>🍴 餐飲</span>
-      <span>🛍️ 市集</span><span>🏛️ 景點</span><span>💆 按摩</span><span>📍 我新增的行程</span>
+    <div class="day-map-section">
+      <div class="day-map-title" id="dayMapTitle">📍 Day1 地圖</div>
+      <div class="day-map-sub">金色框是這一天的地點，其他天的地點也都還在，只是比較淡</div>
+      <div class="map-chip-row" id="mapChipRow">
+        <button class="map-chip active" data-cat="hotel" onclick="toggleMapCat('hotel')">🏨 住宿</button>
+        <button class="map-chip active" data-cat="attr" onclick="toggleMapCat('attr')">🏛️ 景點</button>
+        <button class="map-chip active" data-cat="food" onclick="toggleMapCat('food')">🍴 餐廳/咖啡</button>
+        <button class="map-chip active" data-cat="shop" onclick="toggleMapCat('shop')">🛍️ 市集/購物</button>
+        <button class="map-chip active" data-cat="transport" onclick="toggleMapCat('transport')">🚕 交通</button>
+        <button class="map-chip active" data-cat="massage" onclick="toggleMapCat('massage')">💆 按摩</button>
+      </div>
+      <div id="leaflet-map"></div>
+      <div class="card" style="font-size:.78rem;color:var(--text2);margin-top:10px;">點擊地圖圖示查看詳細資訊；行程卡片裡有「📍 定位」的項目，點了會自動在地圖上標示位置。</div>
     </div>
-    <div class="card" style="font-size:.82rem;color:var(--text2)">點擊地圖圖示查看詳細資訊，再點「Google Maps 導航」開啟路線。右上角可切換圖層分類。在「行程」頁籤新增行程時填入含座標的 Google Maps 連結，會自動出現在這裡的「📍 我新增的行程」圖層。</div>
   </section>
 
   <!-- ═══════ LEDGER ═══════ -->
@@ -1776,17 +1784,17 @@ const DAYS = [
 const POIS = [
   {name:'相鐵 GRAND FRESA 曼谷', cat:'hotel', ic:'🏨', lat:13.7360295, lng:100.5634054, note:'鄰近 BTS Asok，本次住宿飯店', url:'https://maps.app.goo.gl/VSShUUuVQW7cWVbB9'},
   {name:'蘇凡納布機場 BKK', cat:'transport', ic:'✈️', lat:13.6900, lng:100.7501, note:'去程／回程起降機場'},
-  {name:'One More Thai 按摩', cat:'massage', ic:'💆', lat:13.7368, lng:100.5615, note:'Day1 首場按摩'},
-  {name:'Terminal 21 Asok', cat:'food', ic:'🍴', lat:13.7373, lng:100.5606, note:'美食街，泰奶與道地小吃'},
-  {name:'恰圖恰週末市集', cat:'shop', ic:'🛍️', lat:13.7999, lng:100.5502, note:'世界最大露天市集'},
-  {name:'金東尼人妖秀', cat:'attr', ic:'🎭', lat:13.7050, lng:100.5033, note:'泰國經典華麗文化秀'},
-  {name:'Jodd Fairs 夜市', cat:'food', ic:'🍢', lat:13.7595, lng:100.5661, note:'必吃火山排骨'},
-  {name:'鄭王廟 Wat Arun', cat:'attr', ic:'🏛️', lat:13.7437, lng:100.4888, note:'泰服體驗＋專業攝影'},
-  {name:'大皇宮 & 玉佛寺', cat:'attr', ic:'🏛️', lat:13.7500, lng:100.4913, note:'金碧輝煌的佛教建築藝術'},
-  {name:'美功鐵道市場', cat:'attr', ic:'🚋', lat:13.4967, lng:99.9634, note:'火車穿過瞬間收傘的經典畫面'},
-  {name:'丹嫩莎朵水上市場', cat:'attr', ic:'🚤', lat:13.5175, lng:99.9550, note:'傳統水上市集'},
-  {name:'暹羅廣場 Siam Square', cat:'shop', ic:'🛍️', lat:13.7460, lng:100.5340, note:'曼谷西門町'},
-  {name:'Siam Paragon', cat:'shop', ic:'🛒', lat:13.7460, lng:100.5352, note:'精品百貨'},
+  {name:'One More Thai 按摩', cat:'massage', ic:'💆', lat:13.7368, lng:100.5615, note:'Day1 首場按摩', day:'2027-01-23'},
+  {name:'Terminal 21 Asok', cat:'food', ic:'🍴', lat:13.7373, lng:100.5606, note:'美食街，泰奶與道地小吃', day:'2027-01-23'},
+  {name:'恰圖恰週末市集', cat:'shop', ic:'🛍️', lat:13.7999, lng:100.5502, note:'世界最大露天市集', day:'2027-01-24'},
+  {name:'金東尼人妖秀', cat:'attr', ic:'🎭', lat:13.7050, lng:100.5033, note:'泰國經典華麗文化秀', day:'2027-01-24'},
+  {name:'Jodd Fairs 夜市', cat:'food', ic:'🍢', lat:13.7595, lng:100.5661, note:'必吃火山排骨', day:'2027-01-24'},
+  {name:'鄭王廟 Wat Arun', cat:'attr', ic:'🏛️', lat:13.7437, lng:100.4888, note:'泰服體驗＋專業攝影', day:'2027-01-25'},
+  {name:'大皇宮 & 玉佛寺', cat:'attr', ic:'🏛️', lat:13.7500, lng:100.4913, note:'金碧輝煌的佛教建築藝術', day:'2027-01-25'},
+  {name:'美功鐵道市場', cat:'attr', ic:'🚋', lat:13.4967, lng:99.9634, note:'火車穿過瞬間收傘的經典畫面', day:'2027-01-26'},
+  {name:'丹嫩莎朵水上市場', cat:'attr', ic:'🚤', lat:13.5175, lng:99.9550, note:'傳統水上市集', day:'2027-01-26'},
+  {name:'暹羅廣場 Siam Square', cat:'shop', ic:'🛍️', lat:13.7460, lng:100.5340, note:'曼谷西門町', day:'2027-01-26'},
+  {name:'Siam Paragon', cat:'shop', ic:'🛒', lat:13.7460, lng:100.5352, note:'精品百貨', day:'2027-01-26'},
 ];
 
 const DEFAULT_PACK = ['護照 / 機票','泰銖現金 & 信用卡','萬用轉接頭 & 充電器','行動電源','防曬乳','泳衣','拖鞋 / 涼鞋','輕便雨傘','常備藥品','長裙或披肩（Day3 大皇宮）','太陽眼鏡','帽子','盥洗用品'];
@@ -1802,7 +1810,7 @@ function _goView(name){
   document.getElementById('view-'+name).classList.add('active');
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
   window.scrollTo({top:0,behavior:'smooth'});
-  if(name==='map'){ setTimeout(initMap,30); setTimeout(refreshCustomMapMarkers,60); }
+  if(name==='itinerary'){ setTimeout(()=>{ if(!mapInited) initMap(); else renderMapForCurrentDay(); },30); }
   if(name==='weather') initWeather();
   if(name==='docs') renderDocs();
   if(name==='ledger'){ renderLedger(); initCurrency(); ensureRate().then(renderLedger); }
@@ -1872,7 +1880,7 @@ function saveDayEvents(date){
 function removeDayEvent(date,id){
   DAY_EVENTS[date]=DAY_EVENTS[date].filter(e=>e.id!==id);
   saveDayEvents(date);renderDayStage();
-  refreshCustomMapMarkers();
+  if(mapInited) renderMapForCurrentDay();
 }
 function pickIcon(inputId, ic){
   document.getElementById(inputId).value = ic;
@@ -1885,7 +1893,7 @@ function addDayEvent(date){
   DAY_EVENTS[date].push(ev);saveDayEvents(date);
   ['newEvTime','newEvIcon','newEvTitle','newEvDesc','newEvGmap','newEvLatLng','newEvAttach'].forEach(id=>g(id).value='');
   renderDayStage();
-  refreshCustomMapMarkers();
+  if(mapInited) renderMapForCurrentDay();
 }
 function renderDayDots(){
   const t=todayStr();
@@ -1931,7 +1939,9 @@ function renderDayStage(){
     }
     const gmapHtml=ev.gmap?`<a href="${ev.gmap}" target="_blank" rel="noopener" class="ev-link-btn">🗺️ Google Maps</a>`:'';
     const attachHtml=ev.attachUrl?`<a href="${ev.attachUrl}" target="_blank" rel="noopener" class="ev-link-btn ev-link-attach">📎 附件</a>`:'';
-    const linksHtml=(gmapHtml||attachHtml)?`<div class="ev-links">${gmapHtml}${attachHtml}</div>`:'';
+    const evCoord=parseManualLatLng(ev.latlng)||extractLatLngFromUrl(ev.gmap);
+    const locateHtml=evCoord?`<button class="ev-link-btn ev-locate-btn" data-lat="${evCoord.lat}" data-lng="${evCoord.lng}" data-name="${escLed(ev.tt)}" onclick="focusMapOnEventBtn(this)">📍 定位</button>`:'';
+    const linksHtml=(gmapHtml||attachHtml||locateHtml)?`<div class="ev-links">${gmapHtml}${attachHtml}${locateHtml}</div>`:'';
 
     return `<div class="ev ${nowFlag?'now':''}">
       <button class="ev-edit" onclick="openEditModal('${day.date}','${ev.id}')" title="編輯">編輯</button>
@@ -1989,7 +1999,7 @@ function renderDayStage(){
   document.getElementById('dayNext').disabled=currentDayIndex===DAYS.length-1;
   renderDayDots();
 }
-function goDay(i){currentDayIndex=Math.max(0,Math.min(DAYS.length-1,i));renderDayStage();}
+function goDay(i){currentDayIndex=Math.max(0,Math.min(DAYS.length-1,i));renderDayStage();if(mapInited) renderMapForCurrentDay();}
 function shiftDay(d){goDay(currentDayIndex+d);}
 window.removeDayEvent_wrap=function(arg){const[date,id]=arg.split('|');removeDayEvent(date,id);};
 
@@ -2051,7 +2061,7 @@ function saveEditEvent(){
   saveDayEvents(date);
   closeEditModal();
   renderDayStage();
-  refreshCustomMapMarkers();
+  if(mapInited) renderMapForCurrentDay();
 }
 
 /* swipe */
@@ -2431,7 +2441,12 @@ function addTip(){
    MAP
 ═══════════════════════════════════════ */
 let mapInited=false;
-let customLayerGroup=null;
+let leafletMapInstance=null;
+let mapCatGroups={};
+let mapHighlightLayer=null;
+let mapMutedLayer=null;
+let mapCatVisible={hotel:true,attr:true,food:true,shop:true,transport:true,massage:true};
+
 function extractLatLngFromUrl(url){
   if(!url) return null;
   let m = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
@@ -2448,42 +2463,101 @@ function parseManualLatLng(s){
   if(!m) return null;
   return {lat:+m[1], lng:+m[2]};
 }
-function getCustomMapPoints(){
-  const pts=[];
-  DAYS.forEach(day=>{
-    (DAY_EVENTS[day.date]||[]).forEach(ev=>{
-      const manual = parseManualLatLng(ev.latlng);
-      const c = manual || extractLatLngFromUrl(ev.gmap);
-      if(!c) return;
-      pts.push({name:ev.tt, note:day.title+'　'+(ev.t||''), lat:c.lat, lng:c.lng, url:ev.gmap||''});
-    });
-  });
-  return pts;
+
+function mapPopupHtml(name, note, gm){
+  return `<b style="font-size:.9rem">${name}</b><br><span style="font-size:.78rem;color:#666">${note}</span><br><a style="display:inline-block;margin-top:6px;padding:5px 11px;background:#6E8570;color:#fff;border-radius:7px;font-size:.73rem;font-weight:600;text-decoration:none" href="${gm}" target="_blank" rel="noopener">Google Maps →</a>`;
 }
-function refreshCustomMapMarkers(){
-  if(!customLayerGroup) return;
-  customLayerGroup.clearLayers();
-  getCustomMapPoints().forEach(p=>{
-    const gm = p.url || ('https://www.google.com/maps/dir/?api=1&destination='+p.lat+','+p.lng);
-    const icon=L.divIcon({html:'<div style="font-size:22px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))">📍</div>',className:'',iconSize:[26,26],iconAnchor:[13,13]});
-    L.marker([p.lat,p.lng],{icon}).bindPopup(`<b style="font-size:.9rem">${p.name}</b><br><span style="font-size:.78rem;color:#666">${p.note}</span><br><a style="display:inline-block;margin-top:6px;padding:5px 11px;background:#6E8570;color:#fff;border-radius:7px;font-size:.73rem;font-weight:600;text-decoration:none" href="${gm}" target="_blank" rel="noopener">Google Maps →</a>`).addTo(customLayerGroup);
-  });
-}
+
 function initMap(){
   if(mapInited)return;mapInited=true;
-  const map=L.map('leaflet-map',{scrollWheelZoom:true}).setView([13.75,100.55],11);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(map);
-  const groups={hotel:L.layerGroup(),transport:L.layerGroup(),food:L.layerGroup(),shop:L.layerGroup(),attr:L.layerGroup(),massage:L.layerGroup(),custom:L.layerGroup()};
-  const labels={hotel:'🏨 飯店',transport:'✈️ 交通',food:'🍴 餐飲',shop:'🛍️ 市集',attr:'🏛️ 景點',massage:'💆 按摩',custom:'📍 我新增的行程'};
-  customLayerGroup=groups.custom;
-  POIS.forEach(p=>{
-    const icon=L.divIcon({html:'<div style="font-size:22px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))">'+p.ic+'</div>',className:'',iconSize:[26,26],iconAnchor:[13,13]});
-    const gm=p.url||('https://www.google.com/maps/dir/?api=1&destination='+p.lat+','+p.lng);
-    L.marker([p.lat,p.lng],{icon}).bindPopup(`<b style="font-size:.9rem">${p.name}</b><br><span style="font-size:.78rem;color:#666">${p.note}</span><br><a style="display:inline-block;margin-top:6px;padding:5px 11px;background:#6E8570;color:#fff;border-radius:7px;font-size:.73rem;font-weight:600;text-decoration:none" href="${gm}" target="_blank" rel="noopener">Google Maps →</a>`).addTo(groups[p.cat]);
+  leafletMapInstance=L.map('leaflet-map',{scrollWheelZoom:true}).setView([13.75,100.55],11);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(leafletMapInstance);
+  ['hotel','attr','food','shop','transport','massage'].forEach(c=>{
+    mapCatGroups[c]=L.layerGroup().addTo(leafletMapInstance);
   });
-  const overlays={};Object.keys(groups).forEach(k=>{groups[k].addTo(map);overlays[labels[k]]=groups[k];});
-  L.control.layers(null,overlays,{collapsed:false}).addTo(map);
-  refreshCustomMapMarkers();
+  mapMutedLayer=L.layerGroup().addTo(leafletMapInstance);
+  mapHighlightLayer=L.layerGroup().addTo(leafletMapInstance);
+  renderMapForCurrentDay();
+}
+
+function toggleMapCat(cat){
+  mapCatVisible[cat]=!mapCatVisible[cat];
+  const btn=document.querySelector('.map-chip[data-cat="'+cat+'"]');
+  if(btn) btn.classList.toggle('active',mapCatVisible[cat]);
+  if(!leafletMapInstance||!mapCatGroups[cat]) return;
+  if(mapCatVisible[cat]) mapCatGroups[cat].addTo(leafletMapInstance);
+  else leafletMapInstance.removeLayer(mapCatGroups[cat]);
+}
+
+function renderMapForCurrentDay(){
+  if(!leafletMapInstance) return;
+  const day=DAYS[currentDayIndex];
+  const titleEl=document.getElementById('dayMapTitle');
+  if(titleEl) titleEl.textContent='📍 '+day.title.split('·')[0].trim()+' 地圖';
+
+  Object.values(mapCatGroups).forEach(g=>g.clearLayers());
+  mapHighlightLayer.clearLayers();
+  mapMutedLayer.clearLayers();
+
+  const fitPts=[];
+
+  POIS.forEach(p=>{
+    const isToday=p.day===day.date;
+    const isOtherDay=!!p.day && !isToday;
+    const size=isToday?30:24;
+    const style=isToday
+      ? `background:#E9C687;border-radius:50%;padding:4px;box-shadow:0 0 0 2px #B8874A;opacity:1;`
+      : `opacity:${isOtherDay?0.4:0.95};`;
+    const icon=L.divIcon({
+      html:`<div style="font-size:${isToday?22:18}px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4));${style}">${p.ic}</div>`,
+      className:'',iconSize:[size,size],iconAnchor:[size/2,size/2]
+    });
+    const gm=p.url||('https://www.google.com/maps/dir/?api=1&destination='+p.lat+','+p.lng);
+    L.marker([p.lat,p.lng],{icon}).bindPopup(mapPopupHtml(p.name,p.note,gm)).addTo(mapCatGroups[p.cat]);
+    if(!mapCatVisible[p.cat]) leafletMapInstance.removeLayer(mapCatGroups[p.cat]);
+    if(isToday) fitPts.push([p.lat,p.lng]);
+  });
+
+  DAYS.forEach(d=>{
+    (DAY_EVENTS[d.date]||[]).forEach(ev=>{
+      const manual=parseManualLatLng(ev.latlng);
+      const c=manual||extractLatLngFromUrl(ev.gmap);
+      if(!c) return;
+      const isToday=d.date===day.date;
+      const size=isToday?30:22;
+      const style=isToday
+        ? `background:#E9C687;border-radius:50%;padding:4px;box-shadow:0 0 0 2px #B8874A;opacity:1;`
+        : `opacity:.4;`;
+      const icon=L.divIcon({
+        html:`<div style="font-size:${isToday?22:16}px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4));${style}">📍</div>`,
+        className:'',iconSize:[size,size],iconAnchor:[size/2,size/2]
+      });
+      const gm=ev.gmap||('https://www.google.com/maps/dir/?api=1&destination='+c.lat+','+c.lng);
+      const marker=L.marker([c.lat,c.lng],{icon}).bindPopup(mapPopupHtml(escLed(ev.tt), d.title+'　'+(ev.t||''), gm));
+      marker.addTo(isToday?mapHighlightLayer:mapMutedLayer);
+      if(isToday) fitPts.push([c.lat,c.lng]);
+    });
+  });
+
+  if(fitPts.length){
+    leafletMapInstance.fitBounds(fitPts,{padding:[50,50],maxZoom:14});
+  }
+}
+
+function focusMapOnEventBtn(btn){
+  focusMapOnEvent(parseFloat(btn.dataset.lat), parseFloat(btn.dataset.lng), btn.dataset.name);
+}
+function focusMapOnEvent(lat,lng,name){
+  const mapEl=document.getElementById('leaflet-map');
+  if(!mapEl) return;
+  if(!mapInited) initMap();
+  mapEl.scrollIntoView({behavior:'smooth',block:'center'});
+  setTimeout(()=>{
+    if(!leafletMapInstance) return;
+    leafletMapInstance.invalidateSize();
+    leafletMapInstance.setView([lat,lng],16);
+    L.popup().setLatLng([lat,lng]).setContent('<b style="font-size:.9rem">'+escLed(name)+'</b>').openOn(leafletMapInstance);
+  },400);
 }
 
 /* ═══════════════════════════════════════
