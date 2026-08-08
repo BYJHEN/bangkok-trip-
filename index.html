@@ -360,14 +360,19 @@ input,textarea,select{font-family:var(--font-body)}
 }
 .pager-arrow:disabled{opacity:.3;cursor:default}
 .pager-arrow:active:not(:disabled){transform:scale(.9)}
-.day-dots{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.day-dots{display:flex;gap:8px;overflow-x:auto;padding:2px;scrollbar-width:none;flex:1;min-width:0;}
+.day-dots::-webkit-scrollbar{display:none}
 .day-dot{
-  padding:5px 12px;border-radius:999px;border:1.5px solid var(--div);
-  background:var(--card);font-size:.7rem;font-weight:700;color:var(--text3);cursor:pointer;
-  transition:all .15s;
+  flex-shrink:0;min-width:56px;padding:8px 10px;border-radius:14px;border:1.5px solid var(--div);
+  background:var(--card);font-family:var(--font-en);font-style:italic;
+  font-size:.82rem;font-weight:600;color:var(--text2);cursor:pointer;
+  transition:all .15s;text-align:center;line-height:1.35;
 }
+.day-dot .dd-date{display:block;font-family:var(--font-num);font-style:normal;font-size:.66rem;color:var(--text3);margin-top:1px;}
 .day-dot.active{background:var(--primary);border-color:var(--primary);color:#fff}
-.day-dot.today-dot::after{content:" 🔴"}
+.day-dot.active .dd-date{color:rgba(255,255,255,.8);}
+.day-dot.today-dot{position:relative;}
+.day-dot.today-dot::after{content:'';position:absolute;top:5px;right:6px;width:6px;height:6px;border-radius:50%;background:#E9645C;}
 .day-card{
   border-radius:var(--r);overflow:hidden;border:1px solid var(--div);
   background:var(--card);box-shadow:var(--shadow-sm);
@@ -473,10 +478,11 @@ input,textarea,select{font-family:var(--font-body)}
 .day-map-section{margin-top:22px;}
 .day-map-title{font-family:var(--font-head);font-size:1.02rem;font-weight:700;color:var(--text);margin-bottom:3px;}
 .day-map-sub{font-size:.75rem;color:var(--text3);margin-bottom:12px;}
-.map-chip-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+.map-chip-row{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:6px;margin-bottom:12px;padding-bottom:2px;scrollbar-width:none;}
+.map-chip-row::-webkit-scrollbar{display:none}
 .map-chip{
-  border:1.5px solid var(--div);background:var(--card);color:var(--text2);
-  border-radius:999px;padding:7px 14px;font-size:.74rem;font-weight:600;cursor:pointer;
+  flex-shrink:0;border:1.5px solid var(--div);background:var(--card);color:var(--text2);
+  border-radius:999px;padding:5px 10px;font-size:.66rem;font-weight:600;cursor:pointer;white-space:nowrap;
 }
 .map-chip.active{background:var(--primary);border-color:var(--primary);color:#fff;}
 .ev-locate-btn{background:var(--accent-a)!important;}
@@ -529,6 +535,11 @@ input,textarea,select{font-family:var(--font-body)}
   font-size:1rem;padding:2px 5px;opacity:.4;flex-shrink:0;margin-top:0;
 }
 .check-row .rm:hover{opacity:1;color:var(--danger)}
+.drag-handle{
+  flex-shrink:0;cursor:grab;touch-action:none;color:var(--text3);
+  font-size:1.05rem;padding:2px 4px;margin-top:0;user-select:none;
+}
+.check-row.dragging{opacity:.45;background:var(--bg2);border-radius:var(--r-xs);}
 
 /* ── TIPS ── */
 .tip-card{display:flex;gap:14px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--div)}
@@ -1389,7 +1400,6 @@ input,textarea,select{font-family:var(--font-body)}
       <button class="pager-arrow" id="dayNext" onclick="shiftDay(1)">→</button>
     </div>
     <div id="dayStage"></div>
-    <div class="footer-note">🟢 漸層色帶＝住宿相鐵 GRAND FRESA；🟠 暖色帶＝搭機日<br>滑動或點左右箭頭切換 Day 1–5</div>
 
     <div class="day-map-section">
       <div class="day-map-title" id="dayMapTitle">📍 Day1 地圖</div>
@@ -1474,8 +1484,13 @@ input,textarea,select{font-family:var(--font-body)}
 
   <!-- ═══════ PACKING ═══════ -->
   <section id="view-packing" class="view">
-    <div class="page-head"><h2>行李清單</h2><div class="sub">勾選完成 · 可自訂新增</div></div>
-    <div class="list-tools">
+    <div class="page-head">
+      <div class="page-head-row">
+        <div><h2>行李清單</h2><div class="sub">勾選完成 · 可自訂新增</div></div>
+        <button class="itin-edit-toggle" id="packEditToggle" onclick="toggleChecklistEditMode('pack')">✏️ 編輯清單</button>
+      </div>
+    </div>
+    <div class="list-tools" id="packListTools" style="display:none;">
       <div class="list-tools-inputs">
         <input type="text" id="packInput" placeholder="新增物品，例如：轉接頭">
         <input type="url" id="packLinkInput" placeholder="連結（選填，例如商品頁）">
@@ -1489,13 +1504,18 @@ input,textarea,select{font-family:var(--font-body)}
 
   <!-- ═══════ WISHLIST ═══════ -->
   <section id="view-wishlist" class="view">
-    <div class="page-head"><h2>願望清單</h2><div class="sub">必吃 · 必買 · 必做，逛吃玩不漏接</div></div>
+    <div class="page-head">
+      <div class="page-head-row">
+        <div><h2>願望清單</h2><div class="sub">必吃 · 必買 · 必做，逛吃玩不漏接</div></div>
+        <button class="itin-edit-toggle" id="wishEditToggle" onclick="toggleChecklistEditMode('wish')">✏️ 編輯清單</button>
+      </div>
+    </div>
     <div class="subtabs" id="wishSubtabs">
       <button class="subtab-btn active" data-sub="eat" onclick="goWishSub('eat')">🍜 必吃</button>
       <button class="subtab-btn" data-sub="buy" onclick="goWishSub('buy')">🛍️ 必買</button>
       <button class="subtab-btn" data-sub="do" onclick="goWishSub('do')">🎯 必做</button>
     </div>
-    <div class="list-tools">
+    <div class="list-tools" id="wishListTools" style="display:none;">
       <div class="list-tools-inputs">
         <input type="text" id="wishInput" placeholder="新增品項">
         <input type="url" id="wishLinkInput" placeholder="連結（選填，例如商品頁）">
@@ -2091,9 +2111,10 @@ function addDayEvent(date){
 }
 function renderDayDots(){
   const t=todayStr();
-  document.getElementById('dayDots').innerHTML=DAYS.map((d,i)=>
-    `<button class="day-dot ${i===currentDayIndex?'active':''}${d.date===t?' today-dot':''}" onclick="goDay(${i})">Day${i+1}</button>`
-  ).join('');
+  document.getElementById('dayDots').innerHTML=DAYS.map((d,i)=>{
+    const md=d.date.slice(5).replace('-','/');
+    return `<button class="day-dot ${i===currentDayIndex?'active':''}${d.date===t?' today-dot':''}" onclick="goDay(${i})">Day${i+1}<span class="dd-date">${md}</span></button>`;
+  }).join('');
 }
 function evStartMinutes(t){
   if(!t) return 99999;
@@ -2131,7 +2152,7 @@ function renderDayStage(){
         if(now>=s&&now<=e2) nowFlag=true;
       }
     }
-    const gmapHtml=ev.gmap?`<a href="${ev.gmap}" target="_blank" rel="noopener" class="ev-link-btn">🗺️ Google Maps</a>`:'';
+    const gmapHtml=ev.gmap?`<a href="${ev.gmap}" target="_blank" rel="noopener" class="ev-link-btn">🗺️ 導航→</a>`:'';
     const attachHtml=ev.attachUrl?`<a href="${ev.attachUrl}" target="_blank" rel="noopener" class="ev-link-btn ev-link-attach">📎 附件</a>`:'';
     const evCoord=parseManualLatLng(ev.latlng)||extractLatLngFromUrl(ev.gmap);
     const locateHtml=evCoord?`<button class="ev-link-btn ev-locate-btn" data-lat="${evCoord.lat}" data-lng="${evCoord.lng}" data-name="${escLed(ev.tt)}" data-gmap="${escLed(ev.gmap||('https://www.google.com/maps/dir/?api=1&destination='+evCoord.lat+','+evCoord.lng))}" onclick="focusMapOnEventBtn(this)">📍 定位</button>`:'';
@@ -2296,18 +2317,73 @@ function goWishSub(sub){
   document.getElementById('wishInput').placeholder=sub==='eat'?'新增必吃美食':sub==='buy'?'新增必買品項':'新增必做體驗';
   renderChecklist(sub);
 }
+let checklistEditMode={pack:false,wish:false};
+function modeKeyForKind(kind){ return kind==='pack' ? 'pack' : 'wish'; }
+function toggleChecklistEditMode(modeKey){
+  checklistEditMode[modeKey]=!checklistEditMode[modeKey];
+  const on=checklistEditMode[modeKey];
+  const btn=document.getElementById(modeKey==='pack'?'packEditToggle':'wishEditToggle');
+  const tools=document.getElementById(modeKey==='pack'?'packListTools':'wishListTools');
+  if(btn){ btn.textContent=on?'✓ 完成編輯':'✏️ 編輯清單'; btn.classList.toggle('active',on); }
+  if(tools) tools.style.display=on?'flex':'none';
+  if(modeKey==='pack') renderChecklist('pack');
+  else renderChecklist(currentWishSub);
+}
+
 function renderChecklist(kind){
   const cfg=KIND_CFG[kind],list=STATE[kind];
+  const editing=checklistEditMode[modeKeyForKind(kind)];
   const done=list.filter(i=>i.checked).length,pct=list.length?Math.round(done/list.length*100):0;
   document.getElementById(cfg.progEl).textContent=done+' / '+list.length+' 已完成';
   if(document.getElementById(cfg.barEl)) document.getElementById(cfg.barEl).style.width=pct+'%';
-  document.getElementById(cfg.listEl).innerHTML=list.map(item=>`
-    <div class="check-row ${item.checked?'done':''}">
+  document.getElementById(cfg.listEl).innerHTML=list.map((item,idx)=>`
+    <div class="check-row ${item.checked?'done':''}" data-idx="${idx}">
+      ${editing?`<div class="drag-handle" onpointerdown="startItemDrag(event,'${kind}',${idx})">⠿</div>`:''}
       <div class="chk" onclick="toggleItem('${kind}','${item.id}')">${item.checked?'✓':''}</div>
       <span>${item.text}</span>
       ${item.link?`<a class="item-link" href="${item.link}" target="_blank" rel="noopener" title="開啟連結">🔗</a>`:''}
-      <button class="rm" onclick="removeItem_wrap('${kind}|${item.id}')">✕</button>
+      ${editing?`<button class="rm" onclick="removeItem_wrap('${kind}|${item.id}')">✕</button>`:''}
     </div>`).join('')||'<div class="check-row"><span style="color:var(--text3)">目前沒有項目</span></div>';
+}
+
+let itemDragState=null;
+function startItemDrag(e,kind,idx){
+  e.preventDefault();
+  const listEl=document.getElementById(KIND_CFG[kind].listEl);
+  itemDragState={kind,idx};
+  const rows=listEl.querySelectorAll('.check-row');
+  if(rows[idx]) rows[idx].classList.add('dragging');
+  document.addEventListener('pointermove',onItemDragMove);
+  document.addEventListener('pointerup',onItemDragEnd);
+}
+function onItemDragMove(e){
+  if(!itemDragState) return;
+  const {kind}=itemDragState;
+  const listEl=document.getElementById(KIND_CFG[kind].listEl);
+  const rows=Array.from(listEl.querySelectorAll('.check-row'));
+  const y=e.clientY;
+  let newIdx=itemDragState.idx;
+  for(let i=0;i<rows.length;i++){
+    const rect=rows[i].getBoundingClientRect();
+    if(y>rect.top&&y<rect.bottom){ newIdx=i; break; }
+  }
+  if(newIdx!==itemDragState.idx){
+    const list=STATE[kind];
+    const [moved]=list.splice(itemDragState.idx,1);
+    list.splice(newIdx,0,moved);
+    itemDragState.idx=newIdx;
+    renderChecklist(kind);
+    const newRows=document.getElementById(KIND_CFG[kind].listEl).querySelectorAll('.check-row');
+    if(newRows[newIdx]) newRows[newIdx].classList.add('dragging');
+  }
+}
+function onItemDragEnd(){
+  if(!itemDragState) return;
+  saveList(KIND_CFG[itemDragState.kind].key,STATE[itemDragState.kind]);
+  document.removeEventListener('pointermove',onItemDragMove);
+  document.removeEventListener('pointerup',onItemDragEnd);
+  document.querySelectorAll('.check-row.dragging').forEach(r=>r.classList.remove('dragging'));
+  itemDragState=null;
 }
 function toggleItem(kind,id){
   const it=STATE[kind].find(i=>i.id===id);if(it)it.checked=!it.checked;
