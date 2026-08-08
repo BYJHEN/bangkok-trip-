@@ -187,11 +187,34 @@ input,textarea,select{font-family:var(--font-body)}
   border:none;background:#fff;color:var(--primary);border-radius:999px;
   padding:6px 14px;font-size:.78rem;font-weight:700;cursor:pointer;
 }
+.tabs-row{display:flex;align-items:center;gap:6px;padding:0 16px 12px;}
 .tabs{
-  display:flex;gap:6px;overflow-x:auto;padding:0 16px 12px;
-  scrollbar-width:none;
+  display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;flex:1;min-width:0;
+  scrollbar-width:thin;cursor:grab;
 }
-.tabs::-webkit-scrollbar{display:none}
+.tabs::-webkit-scrollbar{height:4px;}
+.tabs::-webkit-scrollbar-thumb{background:var(--div);border-radius:999px;}
+.tabs-reorder-btn{
+  flex-shrink:0;border:1.5px solid var(--div);background:var(--card2);
+  border-radius:999px;width:32px;height:32px;font-size:.85rem;cursor:pointer;color:var(--text2);
+}
+#tab-order-modal{
+  position:fixed;inset:0;z-index:500;
+  background:rgba(30,40,50,.55);backdrop-filter:blur(8px);
+  display:none;align-items:flex-end;justify-content:center;
+}
+#tab-order-modal.open{display:flex}
+.tab-order-item{
+  display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px dashed var(--div);
+}
+.tab-order-item:last-child{border-bottom:none;}
+.tab-order-item .toi-label{flex:1;font-size:.88rem;color:var(--text);display:flex;align-items:center;gap:8px;}
+.tab-order-item .toi-moves{display:flex;gap:6px;}
+.tab-order-item .toi-moves button{
+  border:1.5px solid var(--div);background:var(--card);border-radius:999px;
+  width:30px;height:30px;font-size:.82rem;color:var(--text2);cursor:pointer;
+}
+.tab-order-item .toi-moves button:disabled{opacity:.3;cursor:default;}
 .tab-btn{
   flex-shrink:0;display:flex;align-items:center;gap:5px;
   border:1.5px solid var(--div);background:var(--card2);
@@ -1093,15 +1116,31 @@ input,textarea,select{font-family:var(--font-body)}
       </div>
       <div class="sync-status" id="syncStatus">☁️ 尚未設定雲端同步</div>
     </div>
-    <div class="tabs" id="tabs">
-      <button class="tab-btn" data-tab="home"      onclick="go('home')"><span class="tab-icon">🏠</span>首頁</button>
-      <button class="tab-btn" data-tab="tips"      onclick="go('tips')"><span class="tab-icon">💡</span>提醒</button>
-      <button class="tab-btn" data-tab="itinerary" onclick="go('itinerary')"><span class="tab-icon">🗓️</span>行程</button>
-      <button class="tab-btn" data-tab="ledger"    onclick="go('ledger')"><span class="tab-icon">💰</span>記帳</button>
-      <button class="tab-btn" data-tab="wishlist"  onclick="go('wishlist')"><span class="tab-icon">🛍️</span>願望</button>
-      <button class="tab-btn" data-tab="packing"   onclick="go('packing')"><span class="tab-icon">🧳</span>行李</button>
-      <button class="tab-btn" data-tab="weather"   onclick="go('weather')"><span class="tab-icon">☀️</span>天氣</button>
-      <button class="tab-btn" data-tab="docs"      onclick="go('docs')"><span class="tab-icon">📂</span>文件</button>
+    <div class="tabs-row">
+      <div class="tabs" id="tabs">
+        <button class="tab-btn" data-tab="home"      onclick="go('home')"><span class="tab-icon">🏠</span>首頁</button>
+        <button class="tab-btn" data-tab="tips"      onclick="go('tips')"><span class="tab-icon">💡</span>提醒</button>
+        <button class="tab-btn" data-tab="itinerary" onclick="go('itinerary')"><span class="tab-icon">🗓️</span>行程</button>
+        <button class="tab-btn" data-tab="ledger"    onclick="go('ledger')"><span class="tab-icon">💰</span>記帳</button>
+        <button class="tab-btn" data-tab="wishlist"  onclick="go('wishlist')"><span class="tab-icon">🛍️</span>願望</button>
+        <button class="tab-btn" data-tab="packing"   onclick="go('packing')"><span class="tab-icon">🧳</span>行李</button>
+        <button class="tab-btn" data-tab="weather"   onclick="go('weather')"><span class="tab-icon">☀️</span>天氣</button>
+        <button class="tab-btn" data-tab="docs"      onclick="go('docs')"><span class="tab-icon">📂</span>文件</button>
+      </div>
+      <button class="tabs-reorder-btn" onclick="openTabOrderModal()" title="調整頁籤順序">⚙️</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════ TAB ORDER MODAL ═══════════════════════════ -->
+  <div id="tab-order-modal">
+    <div class="edit-sheet">
+      <h3>⚙️ 調整頁籤順序</h3>
+      <div class="edit-sub">用 ↑↓ 排序，完成後點「儲存」</div>
+      <div id="tabOrderList"></div>
+      <div class="edit-actions">
+        <button class="edit-cancel-btn" onclick="closeTabOrderModal()">取消</button>
+        <button class="edit-save-btn" onclick="saveTabOrder()">儲存</button>
+      </div>
     </div>
   </div>
 
@@ -1817,6 +1856,96 @@ function _goView(name){
 }
 function go(name){
   _goView(name);
+}
+
+/* ═══════════════════════════════════════
+   TAB ORDER — desktop wheel-scroll + manual reorder
+═══════════════════════════════════════ */
+const TAB_CONFIG=[
+  {id:'home',icon:'🏠',label:'首頁'},
+  {id:'tips',icon:'💡',label:'提醒'},
+  {id:'itinerary',icon:'🗓️',label:'行程'},
+  {id:'ledger',icon:'💰',label:'記帳'},
+  {id:'wishlist',icon:'🛍️',label:'願望'},
+  {id:'packing',icon:'🧳',label:'行李'},
+  {id:'weather',icon:'☀️',label:'天氣'},
+  {id:'docs',icon:'📂',label:'文件'},
+];
+let tabOrderDraft=[];
+
+// Let mouse-wheel scroll horizontally over the tab row (desktop has no touch swipe).
+(function enableTabWheelScroll(){
+  const tabsEl=document.getElementById('tabs');
+  if(!tabsEl) return;
+  tabsEl.addEventListener('wheel',(e)=>{
+    if(Math.abs(e.deltaY)<=Math.abs(e.deltaX)) return; // already horizontal, let it be
+    e.preventDefault();
+    tabsEl.scrollLeft+=e.deltaY;
+  },{passive:false});
+})();
+
+function loadTabOrder(){
+  try{
+    const raw=localStorage.getItem('bkk2_tab_order');
+    if(raw){
+      const saved=JSON.parse(raw);
+      const validIds=TAB_CONFIG.map(t=>t.id);
+      // keep only ids that still exist, then append any new tabs not in the saved list
+      const cleaned=saved.filter(id=>validIds.includes(id));
+      validIds.forEach(id=>{ if(!cleaned.includes(id)) cleaned.push(id); });
+      return cleaned;
+    }
+  }catch(e){}
+  return TAB_CONFIG.map(t=>t.id);
+}
+function applyTabOrder(){
+  const order=loadTabOrder();
+  const tabsEl=document.getElementById('tabs');
+  if(!tabsEl) return;
+  order.forEach(id=>{
+    const btn=tabsEl.querySelector('.tab-btn[data-tab="'+id+'"]');
+    if(btn) tabsEl.appendChild(btn);
+  });
+}
+applyTabOrder();
+
+function openTabOrderModal(){
+  tabOrderDraft=loadTabOrder();
+  renderTabOrderList();
+  document.getElementById('tab-order-modal').classList.add('open');
+}
+function closeTabOrderModal(){
+  document.getElementById('tab-order-modal').classList.remove('open');
+}
+document.getElementById('tab-order-modal').addEventListener('click',e=>{
+  if(e.target===document.getElementById('tab-order-modal')) closeTabOrderModal();
+});
+function renderTabOrderList(){
+  const el=document.getElementById('tabOrderList');
+  if(!el) return;
+  el.innerHTML=tabOrderDraft.map((id,i)=>{
+    const t=TAB_CONFIG.find(x=>x.id===id);
+    if(!t) return '';
+    return `<div class="tab-order-item">
+      <div class="toi-label"><span>${t.icon}</span><span>${t.label}</span></div>
+      <div class="toi-moves">
+        <button onclick="moveTabOrder(${i},-1)" ${i===0?'disabled':''} title="上移">↑</button>
+        <button onclick="moveTabOrder(${i},1)" ${i===tabOrderDraft.length-1?'disabled':''} title="下移">↓</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function moveTabOrder(idx,dir){
+  const j=idx+dir;
+  if(j<0||j>=tabOrderDraft.length) return;
+  const tmp=tabOrderDraft[idx]; tabOrderDraft[idx]=tabOrderDraft[j]; tabOrderDraft[j]=tmp;
+  renderTabOrderList();
+}
+function saveTabOrder(){
+  localStorage.setItem('bkk2_tab_order', JSON.stringify(tabOrderDraft));
+  applyTabOrder();
+  closeTabOrderModal();
+  showToast('頁籤順序已儲存 ✓');
 }
 
 /* ═══════════════════════════════════════
