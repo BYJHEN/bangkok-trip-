@@ -647,6 +647,13 @@ input,textarea,select{font-family:var(--font-body)}
 .doc-section-title{
   font-family:var(--font-head);font-size:1rem;font-weight:600;color:var(--text);
 }
+.handbook-export-btn{
+  border:none;background:var(--primary);color:#fff;border-radius:999px;
+  padding:14px 28px;font-size:.92rem;font-weight:700;cursor:pointer;
+  box-shadow:var(--shadow-sm);
+}
+.handbook-export-btn:active{transform:scale(.97);}
+
 .doc-add-btn{
   border:1.5px solid var(--primary);background:transparent;color:var(--primary);
   border-radius:999px;padding:5px 14px;font-size:.75rem;font-weight:600;
@@ -912,6 +919,46 @@ input,textarea,select{font-family:var(--font-body)}
 }
 @keyframes spin{to{transform:rotate(360deg)}}
 .muted{font-size:.7rem;color:var(--text3);text-align:right;margin-top:8px}
+/* ── PRINTABLE HANDBOOK ── */
+#printable-handbook{display:none;}
+.ph-cover{
+  height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;page-break-after:always;break-after:page;
+}
+.ph-cover .ph-flag{font-size:2.4rem;margin-bottom:18px;}
+.ph-cover .ph-title{font-family:var(--font-head);font-size:2.2rem;font-weight:700;color:#2C2A22;margin-bottom:10px;}
+.ph-cover .ph-sub{font-family:var(--font-en);font-style:italic;font-size:1.1rem;color:#B8874A;margin-bottom:26px;}
+.ph-cover .ph-dates{font-size:1rem;color:#55524A;margin-bottom:6px;}
+.ph-cover .ph-members{font-size:.9rem;color:#8C8674;}
+.ph-section-title{
+  font-family:var(--font-head);font-size:1.3rem;font-weight:700;color:#2C2A22;
+  margin:0 0 14px;padding-bottom:8px;border-bottom:2px solid #B8874A;
+}
+.ph-day{margin-bottom:22px;page-break-inside:avoid;}
+.ph-day-title{font-family:var(--font-head);font-size:1.05rem;font-weight:700;color:#2C2A22;margin-bottom:2px;}
+.ph-day-date{font-size:.78rem;color:#8C8674;margin-bottom:10px;}
+.ph-event{padding:8px 0 8px 14px;border-left:2px solid #E5DBC1;margin-bottom:2px;page-break-inside:avoid;}
+.ph-event-t{font-size:.76rem;color:#8C8674;font-weight:600;}
+.ph-event-tt{font-size:.92rem;font-weight:700;color:#2C2A22;margin:2px 0;}
+.ph-event-dd{font-size:.82rem;color:#55524A;line-height:1.5;}
+.ph-list{margin-bottom:24px;}
+.ph-list-title{font-family:var(--font-head);font-size:1rem;font-weight:700;color:#2C2A22;margin-bottom:8px;}
+.ph-list ul{margin:0;padding-left:20px;}
+.ph-list li{font-size:.85rem;color:#403E36;margin-bottom:5px;line-height:1.5;}
+.ph-tip{margin-bottom:12px;page-break-inside:avoid;}
+.ph-tip-h{font-size:.9rem;font-weight:700;color:#2C2A22;}
+.ph-tip-t{font-size:.82rem;color:#55524A;line-height:1.5;white-space:pre-wrap;}
+.ph-footer{margin-top:30px;text-align:center;font-size:.72rem;color:#8C8674;}
+
+@media print{
+  body *{visibility:hidden;}
+  #printable-handbook, #printable-handbook *{visibility:visible;}
+  #printable-handbook{
+    display:block;position:absolute;left:0;top:0;width:100%;
+    padding:36px 42px;font-family:'Noto Sans TC','PingFang TC',sans-serif;background:#fff;
+  }
+  .palm-overlay, .update-banner, .sync-status{display:none!important;}
+}
 </style>
 </head>
 <body>
@@ -1126,6 +1173,7 @@ input,textarea,select{font-family:var(--font-body)}
         <button class="tab-btn" data-tab="packing"   onclick="go('packing')"><span class="tab-icon">🧳</span>行李</button>
         <button class="tab-btn" data-tab="weather"   onclick="go('weather')"><span class="tab-icon">☀️</span>天氣</button>
         <button class="tab-btn" data-tab="docs"      onclick="go('docs')"><span class="tab-icon">📂</span>文件</button>
+        <button class="tab-btn" data-tab="handbook"  onclick="go('handbook')"><span class="tab-icon">📄</span>手冊</button>
       </div>
       <button class="tabs-reorder-btn" onclick="openTabOrderModal()" title="調整頁籤順序">⚙️</button>
     </div>
@@ -1335,10 +1383,6 @@ input,textarea,select{font-family:var(--font-body)}
         <button class="itin-edit-toggle" id="itinEditToggle" onclick="toggleItinEditMode()">✏️ 編輯行程</button>
       </div>
     </div>
-    <div class="status-strip">
-      <div><span class="badge" id="tripBadge">—</span><span id="tripStatusText" style="margin-left:8px;font-size:.8rem;color:var(--text3)"></span></div>
-      <div class="num" id="tripCountdownMini" style="font-size:.82rem;font-weight:600;color:var(--accent-a)"></div>
-    </div>
     <div class="day-pager-head">
       <button class="pager-arrow" id="dayPrev" onclick="shiftDay(-1)">←</button>
       <div class="day-dots" id="dayDots"></div>
@@ -1496,6 +1540,26 @@ input,textarea,select{font-family:var(--font-body)}
         <button class="doc-add-btn" onclick="addDocCategory()">＋ 新增類別</button>
       </div>
       <div id="doc-custom-list"></div>
+    </div>
+  </section>
+
+  <!-- ═══════ HANDBOOK / PDF EXPORT ═══════ -->
+  <section id="view-handbook" class="view">
+    <div class="page-head"><h2>匯出手冊</h2><div class="sub">把整趟行程做成一份 PDF，方便離線查看或分享</div></div>
+
+    <div class="card" style="text-align:center;padding:28px 20px;">
+      <div style="font-size:2.2rem;margin-bottom:10px;">📄</div>
+      <div style="font-family:var(--font-head);font-size:1.05rem;font-weight:700;color:var(--text);margin-bottom:6px;">2027 曼谷 FBG 旅遊手冊</div>
+      <div style="font-size:.78rem;color:var(--text3);margin-bottom:20px;line-height:1.6;">內容包含封面、每日行程、行李清單、願望清單與實用提醒。<br>點擊後會開啟列印視窗，選擇「另存為 PDF」即可下載。</div>
+      <button class="handbook-export-btn" onclick="exportHandbookPdf()">📄 匯出手冊（PDF）</button>
+    </div>
+
+    <div class="card" style="margin-top:14px;font-size:.78rem;color:var(--text2);line-height:1.7;">
+      <b>使用說明</b><br>
+      1. 點擊上方按鈕，會跳出瀏覽器的列印視窗<br>
+      2. 目的地／印表機選擇「另存為 PDF」<br>
+      3. 封面會自動獨立成第一頁，其餘內容會依序排版<br>
+      4. 手機上大多數瀏覽器（Safari／Chrome）也支援「儲存為 PDF」
     </div>
   </section>
 
@@ -1870,6 +1934,7 @@ const TAB_CONFIG=[
   {id:'packing',icon:'🧳',label:'行李'},
   {id:'weather',icon:'☀️',label:'天氣'},
   {id:'docs',icon:'📂',label:'文件'},
+  {id:'handbook',icon:'📄',label:'手冊'},
 ];
 let tabOrderDraft=[];
 
@@ -2376,6 +2441,70 @@ function renderCustomEntry(entry,idx){
       <button class="doc-card-save" onclick="saveDocEntry_wrap('custom|${idx}')">✓ 儲存資料</button>
     </div>
   </div>`;
+}
+
+/* ═══════════════════════════════════════
+   HANDBOOK / PDF EXPORT
+   Uses the browser's native print dialog ("Save as PDF") — no external
+   library needed, works offline, and respects the cover-page break below.
+═══════════════════════════════════════ */
+function escPh(s){ return (s||'').toString().replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function buildHandbookHtml(){
+  let html = `
+    <div class="ph-cover">
+      <div class="ph-flag">🇹🇭</div>
+      <div class="ph-title">2027 曼谷 FBG 旅遊手冊</div>
+      <div class="ph-sub">FBG Trip · Bangkok, Thailand</div>
+      <div class="ph-dates">01.23（六）— 01.27（三）· 五天四夜</div>
+      <div class="ph-members">SYW · ZYW · JJ</div>
+    </div>
+  `;
+
+  html += `<div class="ph-section-title">每日行程</div>`;
+  DAYS.forEach(day=>{
+    const events=(DAY_EVENTS[day.date]||[]).slice().sort((a,b)=>evStartMinutes(a.t)-evStartMinutes(b.t));
+    html += `<div class="ph-day">
+      <div class="ph-day-title">${escPh(day.title)}</div>
+      <div class="ph-day-date">${day.date}（${day.wd}）・ ${escPh(day.theme)}</div>
+      ${events.map(ev=>`
+        <div class="ph-event">
+          <div class="ph-event-t">${escPh(ev.ic)} ${escPh(ev.t)}</div>
+          <div class="ph-event-tt">${escPh(ev.tt)}</div>
+          ${ev.dd?`<div class="ph-event-dd">${ev.dd}</div>`:''}
+        </div>`).join('') || '<div class="ph-event-dd">（這天尚未安排行程）</div>'}
+    </div>`;
+  });
+
+  const listSection=(title,list)=>`
+    <div class="ph-list">
+      <div class="ph-list-title">${title}</div>
+      <ul>${(list||[]).map(i=>`<li>${escPh(i.text)}</li>`).join('') || '<li>（尚未新增項目）</li>'}</ul>
+    </div>`;
+  html += `<div class="ph-section-title">清單</div>`;
+  html += listSection('🧳 行李清單', STATE.pack);
+  html += listSection('🍜 必吃', STATE.eat);
+  html += listSection('🛍️ 必買', STATE.buy);
+  html += listSection('🎯 必做', STATE.do);
+
+  html += `<div class="ph-section-title">實用提醒</div>`;
+  TIPS.forEach(t=>{
+    html += `<div class="ph-tip">
+      <div class="ph-tip-h">${escPh(t.icon)} ${escPh(t.title)}</div>
+      ${t.content?`<div class="ph-tip-t">${escPh(t.content)}</div>`:''}
+      ${t.link?`<div class="ph-tip-t">連結：${escPh(t.link)}</div>`:''}
+    </div>`;
+  });
+
+  html += `<div class="ph-footer">2027 曼谷 FBG 旅遊 · 手冊產出時間 ${new Date().toLocaleString('zh-TW')}</div>`;
+  return html;
+}
+
+function exportHandbookPdf(){
+  const el=document.getElementById('printable-handbook');
+  if(!el) return;
+  el.innerHTML=buildHandbookHtml();
+  setTimeout(()=>{ window.print(); }, 120);
 }
 
 function renderDocs(){
@@ -3214,5 +3343,8 @@ if('serviceWorker' in navigator){
   });
 }
 </script>
+
+<!-- ═══════════════════════════ PRINTABLE HANDBOOK (hidden on screen, shown when printing) ═══════════════════════════ -->
+<div id="printable-handbook"></div>
 </body>
 </html>
