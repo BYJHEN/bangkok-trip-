@@ -1940,7 +1940,7 @@ function renderDayStage(){
     const gmapHtml=ev.gmap?`<a href="${ev.gmap}" target="_blank" rel="noopener" class="ev-link-btn">🗺️ Google Maps</a>`:'';
     const attachHtml=ev.attachUrl?`<a href="${ev.attachUrl}" target="_blank" rel="noopener" class="ev-link-btn ev-link-attach">📎 附件</a>`:'';
     const evCoord=parseManualLatLng(ev.latlng)||extractLatLngFromUrl(ev.gmap);
-    const locateHtml=evCoord?`<button class="ev-link-btn ev-locate-btn" data-lat="${evCoord.lat}" data-lng="${evCoord.lng}" data-name="${escLed(ev.tt)}" onclick="focusMapOnEventBtn(this)">📍 定位</button>`:'';
+    const locateHtml=evCoord?`<button class="ev-link-btn ev-locate-btn" data-lat="${evCoord.lat}" data-lng="${evCoord.lng}" data-name="${escLed(ev.tt)}" data-gmap="${escLed(ev.gmap||('https://www.google.com/maps/dir/?api=1&destination='+evCoord.lat+','+evCoord.lng))}" onclick="focusMapOnEventBtn(this)">📍 定位</button>`:'';
     const linksHtml=(gmapHtml||attachHtml||locateHtml)?`<div class="ev-links">${gmapHtml}${attachHtml}${locateHtml}</div>`:'';
 
     return `<div class="ev ${nowFlag?'now':''}">
@@ -2465,7 +2465,8 @@ function parseManualLatLng(s){
 }
 
 function mapPopupHtml(name, note, gm){
-  return `<b style="font-size:.9rem">${name}</b><br><span style="font-size:.78rem;color:#666">${note}</span><br><a style="display:inline-block;margin-top:6px;padding:5px 11px;background:#6E8570;color:#fff;border-radius:7px;font-size:.73rem;font-weight:600;text-decoration:none" href="${gm}" target="_blank" rel="noopener">Google Maps →</a>`;
+  const noteHtml = note ? `<br><span style="font-size:.78rem;color:#666">${note}</span>` : '';
+  return `<b style="font-size:.9rem">${name}</b>${noteHtml}<br><a style="display:inline-block;margin-top:6px;padding:5px 11px;background:#6E8570;color:#fff;border-radius:7px;font-size:.73rem;font-weight:600;text-decoration:none" href="${gm}" target="_blank" rel="noopener">Google Maps →</a>`;
 }
 
 function initMap(){
@@ -2545,18 +2546,19 @@ function renderMapForCurrentDay(){
 }
 
 function focusMapOnEventBtn(btn){
-  focusMapOnEvent(parseFloat(btn.dataset.lat), parseFloat(btn.dataset.lng), btn.dataset.name);
+  focusMapOnEvent(parseFloat(btn.dataset.lat), parseFloat(btn.dataset.lng), btn.dataset.name, btn.dataset.gmap);
 }
-function focusMapOnEvent(lat,lng,name){
+function focusMapOnEvent(lat,lng,name,gmapUrl){
   const mapEl=document.getElementById('leaflet-map');
   if(!mapEl) return;
   if(!mapInited) initMap();
   mapEl.scrollIntoView({behavior:'smooth',block:'center'});
+  const gm=gmapUrl||('https://www.google.com/maps/dir/?api=1&destination='+lat+','+lng);
   setTimeout(()=>{
     if(!leafletMapInstance) return;
     leafletMapInstance.invalidateSize();
     leafletMapInstance.setView([lat,lng],16);
-    L.popup().setLatLng([lat,lng]).setContent('<b style="font-size:.9rem">'+escLed(name)+'</b>').openOn(leafletMapInstance);
+    L.popup().setLatLng([lat,lng]).setContent(mapPopupHtml(escLed(name),'',gm)).openOn(leafletMapInstance);
   },400);
 }
 
