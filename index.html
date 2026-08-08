@@ -375,7 +375,7 @@ input,textarea,select{font-family:var(--font-body)}
 .day-dot.today-dot::after{content:'';position:absolute;top:5px;right:6px;width:6px;height:6px;border-radius:50%;background:#E9645C;}
 .day-card{
   border-radius:var(--r);overflow:hidden;border:1px solid var(--div);
-  background:var(--card);box-shadow:var(--shadow-sm);
+  background:var(--bg2);box-shadow:var(--shadow-sm);
 }
 .day-card.today{border-color:var(--accent-a);box-shadow:0 0 0 2px rgba(168,123,76,.2),var(--shadow)}
 .day-accent{height:4px}
@@ -386,10 +386,10 @@ input,textarea,select{font-family:var(--font-body)}
   font-family:var(--font-en);font-style:italic;font-size:.82rem;
   color:var(--text3);margin-bottom:4px;letter-spacing:.04em;
 }
-.day-title{font-size:1.05rem;font-weight:600;margin-bottom:4px}
+.day-title{font-family:var(--font-head);font-size:1.1rem;font-weight:600;color:var(--text);margin-bottom:4px}
 .day-date-str{font-size:.73rem;color:var(--text3);margin-bottom:12px;letter-spacing:.04em}
 .day-theme{
-  font-size:.78rem;color:var(--accent-a);font-weight:600;
+  font-family:var(--font-body);font-size:.78rem;color:var(--text2);font-weight:500;
   margin-bottom:14px;letter-spacing:.02em;
 }
 .today-pill{
@@ -409,14 +409,36 @@ input,textarea,select{font-family:var(--font-body)}
   content:"";position:absolute;left:5px;top:4px;bottom:4px;
   width:1px;background:var(--div);
 }
-.ev{position:relative;padding:0 0 16px 16px}
-.ev:last-child{padding-bottom:0}
+.timeline{position:relative;padding-left:24px;max-height:52vh;overflow-y:auto;padding-right:2px;}
+.timeline::before{
+  content:"";position:absolute;left:8px;top:4px;bottom:4px;
+  width:1px;background:var(--div);
+}
+.ev{
+  position:relative;
+  background:var(--card2);border:1px solid var(--div);border-radius:var(--r-xs);
+  padding:10px 12px;margin:0 0 12px 0;
+}
+.ev:last-child{margin-bottom:0}
 .ev::before{
-  content:"";position:absolute;left:-17px;top:5px;
+  content:"";position:absolute;left:-16px;top:16px;
   width:8px;height:8px;border-radius:50%;
   background:var(--card);border:1.5px solid var(--secondary);
 }
 .ev.now::before{background:var(--accent-a);border-color:var(--accent-a);box-shadow:0 0 0 4px rgba(168,123,76,.2)}
+.ev.now{border-color:var(--accent-a);}
+.ev.ev-flight{
+  background:#F7E4DC;border-color:#E8C4B0;
+}
+.ev.ev-transport .ev-t{color:var(--text3);}
+.ev.ev-transport .ev-tt{font-size:.82rem;font-weight:600;color:var(--text3);}
+.ev.ev-transport .ev-dd{font-size:.76rem;color:var(--text3);}
+.ev.ev-transport .ev-ic{opacity:.8;}
+.ev-flight-link{
+  color:var(--primary);font-size:.78rem;font-weight:700;text-decoration:none;
+  cursor:pointer;white-space:nowrap;
+}
+.ev-flight-link:hover{text-decoration:underline;}
 .ev .ev-t{
   font-family:var(--font-num);font-size:.68rem;color:var(--text3);
   font-weight:500;margin-bottom:2px;letter-spacing:.02em;
@@ -426,7 +448,7 @@ input,textarea,select{font-family:var(--font-body)}
   font-size:.6rem;font-weight:700;padding:1px 7px;border-radius:999px;margin-left:6px;
 }
 .ev .ev-ic{font-size:.9rem;margin-right:4px}
-.ev .ev-tt{font-size:.9rem;font-weight:600;color:var(--text);margin-bottom:3px;line-height:1.3}
+.ev .ev-tt{font-size:.85rem;font-weight:400;color:var(--text2);margin-bottom:3px;line-height:1.3}
 .ev .ev-dd{font-size:.8rem;color:var(--text2);line-height:1.5}
 .ev-links{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
 .ev-link-btn{
@@ -882,7 +904,7 @@ input,textarea,select{font-family:var(--font-body)}
 .edit-delete-btn:active{background:#f5e6e6;}
 /* ev edit btn */
 .ev-edit{
-  position:absolute;right:0;top:0;border:none;background:none;
+  position:absolute;right:6px;top:6px;border:none;background:none;
   color:var(--primary);font-size:.78rem;padding:2px 6px;opacity:.5;
   font-weight:700;letter-spacing:.02em;
 }
@@ -1829,6 +1851,18 @@ const FLIGHTS = {
   }
 };
 
+function detectFlightCode(title){
+  const m=(title||'').match(/\b([A-Z]{2}\d{2,4})\b/);
+  if(m && FLIGHTS[m[1]]) return m[1];
+  return null;
+}
+const TRANSPORT_ICONS=['🚐','🚕','🚇','🚌','🚋','🚤','🚢','🛵','🚲','🚖','🚗','🚃','🚞','🛺'];
+const TRANSPORT_KEYWORDS=/走路|步行|接駁|捷運|地鐵|MRT|BTS|轉乘|搭乘|計程車|火車|巴士|渡輪|摩托車|Grab|叫車|包車|自駕|租車|船票|水上市場交通/i;
+function isTransportEvent(ev){
+  if(TRANSPORT_ICONS.includes(ev.ic)) return true;
+  return TRANSPORT_KEYWORDS.test(ev.tt||'') || TRANSPORT_KEYWORDS.test(ev.dd||'');
+}
+
 function fmtFlightDateTime(iso){
   const d = new Date(iso);
   const wd = ['週日','週一','週二','週三','週四','週五','週六'][d.getDay()];
@@ -2157,11 +2191,14 @@ function renderDayStage(){
     const evCoord=parseManualLatLng(ev.latlng)||extractLatLngFromUrl(ev.gmap);
     const locateHtml=evCoord?`<button class="ev-link-btn ev-locate-btn" data-lat="${evCoord.lat}" data-lng="${evCoord.lng}" data-name="${escLed(ev.tt)}" data-gmap="${escLed(ev.gmap||('https://www.google.com/maps/dir/?api=1&destination='+evCoord.lat+','+evCoord.lng))}" onclick="focusMapOnEventBtn(this)">📍 定位</button>`:'';
     const linksHtml=(gmapHtml||attachHtml||locateHtml)?`<div class="ev-links">${gmapHtml}${attachHtml}${locateHtml}</div>`:'';
+    const flightCode=detectFlightCode(ev.tt);
+    const flightLinkHtml=flightCode?` <a class="ev-flight-link" onclick="event.stopPropagation();openFlightModal('${flightCode}')">查看航班詳情→</a>`:'';
+    const isTransport=!flightCode && isTransportEvent(ev);
 
-    return `<div class="ev ${nowFlag?'now':''}">
+    return `<div class="ev ${nowFlag?'now':''} ${flightCode?'ev-flight':''} ${isTransport?'ev-transport':''}">
       <button class="ev-edit" onclick="openEditModal('${day.date}','${ev.id}')" title="編輯">編輯</button>
       <div class="ev-t"><span class="ev-ic">${ev.ic}</span>${ev.t}${nowFlag?'<span class="now-tag">進行中</span>':''}</div>
-      <div class="ev-tt">${ev.tt}</div>
+      <div class="ev-tt">${ev.tt}${flightLinkHtml}</div>
       ${ev.dd?`<div class="ev-dd">${ev.dd}</div>`:''}
       ${linksHtml}
     </div>`;
