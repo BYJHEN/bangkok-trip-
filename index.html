@@ -514,6 +514,38 @@ input,textarea,select{font-family:var(--font-body)}
 .tip-link{color:var(--primary);text-decoration:underline;font-weight:600;}
 .tip-note{font-size:.76rem;color:var(--text3);margin-top:6px;line-height:1.5;}
 .tip-t{font-size:.82rem;color:var(--text2);line-height:1.6}
+.tip-link-btn{
+  display:inline-flex;align-items:center;gap:4px;margin-top:8px;
+  padding:5px 12px;border-radius:8px;background:var(--primary);color:#fff!important;
+  font-size:.74rem;font-weight:600;text-decoration:none;
+}
+.tip-edit-card{
+  border:1.5px solid var(--div);border-radius:var(--r-sm);padding:14px;margin-bottom:12px;background:var(--card2);
+}
+.tip-edit-row{display:flex;gap:8px;margin-bottom:8px;}
+.tip-edit-card input,.tip-edit-card textarea{
+  width:100%;border:1.5px solid var(--div);border-radius:var(--r-xs);padding:9px 11px;
+  font-size:.85rem;color:var(--text);background:var(--card);margin-bottom:8px;font-family:var(--font-body);
+}
+.tip-edit-card textarea{resize:vertical;}
+.tip-edit-actions{display:flex;gap:8px;align-items:center;}
+.tip-edit-actions button{
+  border:1.5px solid var(--div);background:var(--card);border-radius:999px;
+  width:34px;height:34px;font-size:.9rem;color:var(--text2);cursor:pointer;flex-shrink:0;
+}
+.tip-edit-actions button:disabled{opacity:.3;cursor:default;}
+.tip-del-btn{
+  width:auto!important;margin-left:auto;padding:0 14px;color:var(--danger)!important;
+  border-color:var(--danger)!important;font-size:.76rem;font-weight:600;
+}
+.tip-add-card{
+  border:1.5px dashed var(--accent-a);border-radius:var(--r-sm);padding:14px;background:var(--card2);
+}
+.tip-add-h{font-size:.85rem;font-weight:700;color:var(--accent-a);margin-bottom:10px;}
+.tip-add-btn{
+  width:100%;border:none;background:var(--primary);color:#fff;border-radius:var(--r-xs);
+  padding:11px;font-weight:700;font-size:.85rem;cursor:pointer;
+}
 
 /* ── CURRENCY (compact, combined row) ── */
 .fx-combo{display:flex;gap:10px;align-items:stretch;margin-bottom:12px;flex-wrap:wrap;}
@@ -1422,24 +1454,17 @@ input,textarea,select{font-family:var(--font-body)}
 
   <!-- ═══════ TIPS ═══════ -->
   <section id="view-tips" class="view">
-    <div class="page-head"><h2>實用小提醒</h2><div class="sub">出發前再看一次</div></div>
+    <div class="page-head">
+      <div class="page-head-row">
+        <div><h2>實用小提醒</h2><div class="sub">出發前再看一次</div></div>
+        <button class="itin-edit-toggle" id="tipsEditToggle" onclick="toggleTipsEditMode()">✏️ 編輯提醒</button>
+      </div>
+    </div>
+    <div class="card" id="tipsCard">
+      <div id="tipsList"></div>
+    </div>
+
     <div class="card">
-      <div class="tip-card">
-        <div class="tip-ic">👗</div>
-        <div><div class="tip-h">穿著</div><div class="tip-t">Day 3 進入大皇宮嚴禁露肩、短裙或破洞褲，請隨身備妥披肩或長裙，以免現場租借排隊。</div></div>
-      </div>
-      <div class="tip-card">
-        <div class="tip-ic">🚕</div>
-        <div><div class="tip-h">交通</div><div class="tip-t">市區移動善用 Grab / Bolt 叫車，三人分攤下來非常划算，也比路邊攔車安全穩定。</div></div>
-      </div>
-      <div class="tip-card">
-        <div class="tip-ic">🌤️</div>
-        <div><div class="tip-h">天氣</div><div class="tip-t">1 月雖是涼季，但白天陽光依然強烈，記得帶傘或墨鏡遮陽，並適度補充防曬。</div></div>
-      </div>
-      <div class="tip-card">
-        <div class="tip-ic">💰</div>
-        <div><div class="tip-h">金錢</div><div class="tip-t">建議在台灣先換好泰銖，機場匯率較差。大型商場可刷卡，夜市按摩多只收現金。</div></div>
-      </div>
       <div class="tip-card">
         <div class="tip-ic">🛂</div>
         <div style="flex:1;">
@@ -1572,7 +1597,7 @@ function setSyncStatus(text, cls){
 // Every localStorage key below is treated as one "row" in Supabase.
 // New keys just need to be added to this list to be synced too.
 function allSyncKeys(){
-  return ['bkk2_pack','bkk2_eat','bkk2_buy','bkk2_do','bkk2_docs','bkk2_ledger','bkk2_repayments']
+  return ['bkk2_pack','bkk2_eat','bkk2_buy','bkk2_do','bkk2_docs','bkk2_ledger','bkk2_repayments','bkk2_tips']
     .concat(DAYS.map(d=>'bkk2_events_'+d.date));
 }
 
@@ -1638,11 +1663,13 @@ function subscribeRealtime(){
       loadStateFromStorage();
       loadLedgerFromStorage();
       loadRepaymentsFromStorage();
+      loadTipsFromStorage();
       renderChecklist('pack');
       renderChecklist(currentWishSub);
       renderDayStage();
       renderDocs();
       renderLedger();
+      renderTips();
       setSyncStatus('☁️ 已更新（其他裝置）','online');
     })
     .subscribe();
@@ -2283,6 +2310,124 @@ function showToast(msg){
 }
 
 /* ═══════════════════════════════════════
+   TIPS (實用小提醒) — editable / reorderable
+═══════════════════════════════════════ */
+function escTip(s){ return (s||'').toString().replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+const DEFAULT_TIPS=[
+  {id:'tip-1', icon:'👗', title:'穿著', content:'Day 3 進入大皇宮嚴禁露肩、短裙或破洞褲，請隨身備妥披肩或長裙，以免現場租借排隊。', link:''},
+  {id:'tip-2', icon:'🚕', title:'交通', content:'市區移動善用 Grab / Bolt 叫車，三人分攤下來非常划算，也比路邊攔車安全穩定。', link:''},
+  {id:'tip-3', icon:'🌤️', title:'天氣', content:'1 月雖是涼季，但白天陽光依然強烈，記得帶傘或墨鏡遮陽，並適度補充防曬。', link:''},
+  {id:'tip-4', icon:'💰', title:'金錢', content:'建議在台灣先換好泰銖，機場匯率較差。大型商場可刷卡，夜市按摩多只收現金。', link:''},
+];
+
+let TIPS=[];
+function loadTipsFromStorage(){
+  try{
+    const raw=localStorage.getItem('bkk2_tips');
+    if(raw){ TIPS=JSON.parse(raw); return; }
+  }catch(e){}
+  TIPS=DEFAULT_TIPS.map(t=>Object.assign({},t));
+  localStorage.setItem('bkk2_tips', JSON.stringify(TIPS));
+}
+loadTipsFromStorage();
+function saveTips(){
+  localStorage.setItem('bkk2_tips', JSON.stringify(TIPS));
+  cloudPush('bkk2_tips', TIPS);
+}
+
+let tipsEditMode=false;
+function toggleTipsEditMode(){
+  tipsEditMode=!tipsEditMode;
+  const btn=document.getElementById('tipsEditToggle');
+  if(btn){
+    btn.textContent=tipsEditMode?'✓ 完成編輯':'✏️ 編輯提醒';
+    btn.classList.toggle('active',tipsEditMode);
+  }
+  renderTips();
+}
+
+function renderTips(){
+  const el=document.getElementById('tipsList');
+  if(!el) return;
+
+  if(!tipsEditMode){
+    el.innerHTML = TIPS.map(t=>`
+      <div class="tip-card">
+        <div class="tip-ic">${t.icon||'💡'}</div>
+        <div style="flex:1;">
+          <div class="tip-h">${escTip(t.title)}</div>
+          ${t.content?`<div class="tip-t">${escTip(t.content).replace(/\n/g,'<br>')}</div>`:''}
+          ${t.link?`<a class="tip-link-btn" href="${t.link}" target="_blank" rel="noopener">🔗 開啟連結</a>`:''}
+        </div>
+      </div>`).join('') || '<div class="tip-t" style="padding:8px 0;">尚未新增提醒</div>';
+    return;
+  }
+
+  el.innerHTML = TIPS.map((t,i)=>`
+    <div class="tip-edit-card">
+      <div class="tip-edit-row">
+        <input type="text" value="${escTip(t.icon)}" maxlength="4" style="width:56px;text-align:center;flex-shrink:0;" onchange="updateTip(${i},'icon',this.value)" placeholder="💡">
+        <input type="text" value="${escTip(t.title)}" style="flex:1;" onchange="updateTip(${i},'title',this.value)" placeholder="標題">
+      </div>
+      <textarea rows="3" onchange="updateTip(${i},'content',this.value)" placeholder="內容">${t.content||''}</textarea>
+      <input type="url" value="${escTip(t.link)}" onchange="updateTip(${i},'link',this.value)" placeholder="連結（選填，https://...）">
+      <div class="tip-edit-actions">
+        <button onclick="moveTip(${i},-1)" ${i===0?'disabled':''} title="上移">↑</button>
+        <button onclick="moveTip(${i},1)" ${i===TIPS.length-1?'disabled':''} title="下移">↓</button>
+        <button class="tip-del-btn" onclick="deleteTip(${i})">🗑️ 刪除</button>
+      </div>
+    </div>`).join('') + `
+    <div class="tip-add-card">
+      <div class="tip-add-h">＋ 新增提醒</div>
+      <div class="tip-edit-row">
+        <input type="text" id="newTipIcon" maxlength="4" style="width:56px;text-align:center;flex-shrink:0;" placeholder="💡">
+        <input type="text" id="newTipTitle" style="flex:1;" placeholder="標題">
+      </div>
+      <textarea rows="3" id="newTipContent" placeholder="內容"></textarea>
+      <input type="url" id="newTipLink" placeholder="連結（選填，https://...）">
+      <button class="tip-add-btn" onclick="addTip()">新增</button>
+    </div>`;
+}
+
+function updateTip(idx, field, val){
+  if(!TIPS[idx]) return;
+  TIPS[idx][field]=val;
+  saveTips();
+}
+function moveTip(idx, dir){
+  const j=idx+dir;
+  if(j<0||j>=TIPS.length) return;
+  const tmp=TIPS[idx]; TIPS[idx]=TIPS[j]; TIPS[j]=tmp;
+  saveTips();
+  renderTips();
+}
+function deleteTip(idx){
+  if(!confirm('確定要刪除這則提醒嗎？')) return;
+  TIPS.splice(idx,1);
+  saveTips();
+  renderTips();
+}
+function addTip(){
+  const iconEl=document.getElementById('newTipIcon');
+  const titleEl=document.getElementById('newTipTitle');
+  const contentEl=document.getElementById('newTipContent');
+  const linkEl=document.getElementById('newTipLink');
+  const title=titleEl.value.trim();
+  if(!title){ titleEl.focus(); return; }
+  TIPS.push({
+    id:'tip-'+Date.now(),
+    icon: iconEl.value.trim()||'💡',
+    title,
+    content: contentEl.value.trim(),
+    link: linkEl.value.trim()
+  });
+  saveTips();
+  renderTips();
+  showToast('已新增提醒 ✓');
+}
+
+/* ═══════════════════════════════════════
    MAP
 ═══════════════════════════════════════ */
 let mapInited=false;
@@ -2782,6 +2927,7 @@ function init(){
   renderChecklist('pack');
   renderChecklist(currentWishSub);
   renderLedger();
+  renderTips();
   updateBoardAndStatus();
   renderDayStage();
   setInterval(()=>{updateBoardAndStatus();renderDayStage();},60000);
@@ -2797,6 +2943,7 @@ async function bootstrap(){
   loadStateFromStorage();
   loadLedgerFromStorage();
   loadRepaymentsFromStorage();
+  loadTipsFromStorage();
   init();
   subscribeRealtime();
 }
@@ -2815,11 +2962,13 @@ document.addEventListener('visibilitychange', ()=>{
     loadStateFromStorage();
     loadLedgerFromStorage();
     loadRepaymentsFromStorage();
+    loadTipsFromStorage();
     renderChecklist('pack');
     renderChecklist(currentWishSub);
     renderDayStage();
     renderDocs();
     renderLedger();
+    renderTips();
   });
 });
 
