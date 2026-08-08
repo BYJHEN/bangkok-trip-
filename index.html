@@ -1856,7 +1856,7 @@ function detectFlightCode(title){
   if(m && FLIGHTS[m[1]]) return m[1];
   return null;
 }
-const TRANSPORT_ICONS=['🚐','🚕','🚇','🚌','🚋','🚤','🚢','🛵','🚲','🚖','🚗','🚃','🚞','🛺'];
+const TRANSPORT_ICONS=['🚐','🚕','🚇','🚌','🚋','🚤','🚢','🛵','🚲','🚖','🚗','🚃','🚞','🛺','🚶'];
 const TRANSPORT_KEYWORDS=/走路|步行|接駁|捷運|地鐵|MRT|BTS|轉乘|搭乘|計程車|火車|巴士|渡輪|摩托車|Grab|叫車|包車|自駕|租車|船票|水上市場交通/i;
 function isTransportEvent(ev){
   if(TRANSPORT_ICONS.includes(ev.ic)) return true;
